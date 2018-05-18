@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Starting kerberos, zookeeeper and kafka
+# kafka and zookeeper should fail to initialize untill that the kdc database
+
+docker-compose up -d kdc
+
+# Create the required credential 
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey confluent/zookeeper@TEST.CONFLUENT.IO" > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey confluent/producer@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey confluent/consumer@TEST.CONFLUENT.IO"  > /dev/null
+
+# Create server keys 
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zookeeper/zookeeper.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/kafka.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
+
+# Create the keytab to use for Kafka
+docker exec -ti kdc rm -f /var/lib/secret/kafka.key 2>&1 > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka.key -glob confluent/*" > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka.key -glob zookeeper/*" > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka.key -glob kafka/*" > /dev/null
+
+docker-compose up -d 
+
+echo "Example configuration to access kafka:"
+echo "-> docker-compose exec kafka bash -c 'kinit -k -t /var/lib/secret/kafka.key confluent/producer && kafka-console-producer --broker-list kafka:9093 --topic test --producer.config /etc/kafka/consumer.properties'"
+echo "-> docker-compose exec kafka bash -c 'kinit -k -t /var/lib/secret/kafka.key confluent/consumer && kafka-console-consumer --bootstrap-server kafka:9093 --topic test --consumer.config /etc/kafka/consumer.properties'"
