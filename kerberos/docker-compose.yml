@@ -1,0 +1,44 @@
+version: '3'
+services:
+  kdc:
+    hostname: kdc
+    domainname: kerberos_default
+    build: kdc/
+    container_name: kdc
+    volumes:
+      - secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/kdc/krb5.conf
+
+  zookeeper:
+    build: zookeeper/
+    container_name: zookeeper
+    hostname: zookeeper
+    domainname: kerberos_default
+    depends_on: 
+      - kdc
+    # Required to wait for the keytab to get generated
+    restart: on-failure
+    environment:
+      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf 
+    volumes:
+      - secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+
+  kafka:
+    build: kafka/
+    container_name: kafka
+    hostname: kafka
+    domainname: kerberos_default
+    environment:
+      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf 
+    depends_on: 
+      - zookeeper
+      - kdc
+    # Required to wait for the keytab to get generated
+    restart: on-failure
+    volumes:
+      - secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+
+volumes:
+  secret: {}
