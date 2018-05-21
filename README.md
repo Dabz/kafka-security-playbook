@@ -6,13 +6,49 @@ All images has been created from scratch without reusing previously created or o
 
 
 ## TLS without authentication
-TODO
+Contains a basic configuration to enforce TLS with a client and server certificate. The _up_ generates the following file prior to start the docker-compose services:
+1. __certs/ca.key, certs/ca.crt__ - public and private key of the generated self-signed certificate authority
+2. __certs/server.keystore.jks__ - keystore containing the signed certificate for the kafka broker  
+3. __certs/client.keystore.jks__ - keystore containing the signed certificate for a kafka client    
+
+
+### Usage
+```bash
+cd tls
+# Scripts generating the required certificate and starting docker-compose services
+./up
+docker-compose exec kafka kafka-console-producer --broker-list kafka.confluent.local:9093 --topic test --producer.config /etc/kafka/consumer.properties
+docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka.confluent.local:9093 --topic test --consumer.config /etc/kafka/consumer.properties --from-beginning
+```
+
+### Important configuration file
+* [kafka server.properties](tls/kafka/server.properties)
+```
+listeners=SSL://kafka.confluent.local:9093
+advertised.listeners=SSL://kafka.confluent.local:9093
+security.inter.broker.protocol=SSL
+ssl.truststore.location=/var/lib/secret/truststore.jks
+ssl.truststore.password=test1234
+ssl.keystore.location=/var/lib/secret/server.keystore.jks
+ssl.keystore.password=test1234
+ssl.client.auth=required
+```
+* [kafka consumer and producer configuration](tls/kafka/consumer.properties)
+```
+bootstrap.servers=kafka.conflent.local:9093
+security.protocol=SSL
+ssl.truststore.location=/var/lib/secret/truststore.jks
+ssl.truststore.password=test1234
+ssl.keystore.location=/var/lib/secret/client.keystore.jks
+ssl.keystore.password=test1234
+ssl.key.password=test1234
+```
 
 ## Kerberos (GSSAPI) authentication without TLS
 This example contains a basic KDC server and configure both zookeeper and kafka with Kerberos and basics ACL. Credentials are created without password, a keytab containing credentials is available in a Docker volume named "secret". The following credential are automatically created in the KDC database:
-1. _kafka/admin_ - to access zookeeper
-2. _kafka_producer/producer_  - to access kafka as a producer
-3. _kafka_consumer/consumer_  - to access kafka as a consumer
+1. __kafka/admin__ - to access zookeeper
+2. __kafka_producer/producer__  - to access kafka as a producer
+3. __kafka_consumer/consumer__  - to access kafka as a consumer
 
 ### Usage
 ```bash
@@ -26,14 +62,71 @@ docker-compose exec kafka bash -c 'kinit -k -t /var/lib/secret/kafka.key kafka_c
 
 ### Important configuration file
 * [zookeeper properties](kerberos/zookeeper/zookeeper.properties)
+```
+authProvider.1 = org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+requireClientAuthScheme=sasl
+```
 * [zookeeper server and client jaas configuration](kerberos/zookeeper/zookeeper.sasl.jaas.config)
+```
+Server {
+    com.sun.security.auth.module.Krb5LoginModule required
+    useKeyTab=true
+    storeKey=true
+		useTicketCache=false
+    keyTab="/var/lib/secret/kafka.key"
+    principal="zookeeper/zookeeper.kerberos_default@TEST.CONFLUENT.IO";
+};
+```
 * [kafka server.properties](kerberos/kafka/server.properties)
+```
+listeners=SASL_PLAINTEXT://kafka:9093
+advertised.listeners=SASL_PLAINTEXT://kafka:9093
+security.inter.broker.protocol=SASL_PLAINTEXT
+sasl.enabled.mechanisms=GSSAPI
+sasl.mechanism.inter.broker.protocol=GSSAPI
+security.inter.broker.protocol=SASL_PLAINTEXT
+sasl.kerberos.service.name=kafka
+allow.everyone.if.no.acl.found=false
+super.users=User:admin;User:kafka
+authorizer.class.name=kafka.security.auth.SimpleAclAuthorizer
+```
+
 * [kafka server and client jaas configuration](kerberos/kafka/kafka.sasl.jaas.config)
+```
+KafkaServer {
+    com.sun.security.auth.module.Krb5LoginModule required
+    useKeyTab=true
+    storeKey=true
+    keyTab="/var/lib/secret/kafka.key"
+    principal="kafka/kafka.kerberos_default@TEST.CONFLUENT.IO";
+};
+
+KafkaClient {
+    com.sun.security.auth.module.Krb5LoginModule required
+    useKeyTab=true
+    storeKey=true
+    keyTab="/var/lib/secret/kafka.key"
+    principal="admin/kafka.kerberos_default@TEST.CONFLUENT.IO";
+};
+
+Client {
+    com.sun.security.auth.module.Krb5LoginModule required
+    useKeyTab=true
+    storeKey=true
+		useTicketCache=false
+    keyTab="/var/lib/secret/kafka.key"
+    principal="kafka/kafka.kerberos_default@TEST.CONFLUENT.IO";
+};
+
+```
 * [kafka consumer and producer configuration](kerberos/kafka/consumer.properties)
+```
+bootstrap.servers=kafka:9093
+security.protocol=SASL_PLAINTEXT
+sasl.kerberos.service.name=kafka
+sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required \
+								 useTicketCache=true
+```
 
-
-## Kerberos (GSSAPI) authentication with TLS
-TODO
-
-## Scram authentication without TLS
+## Scram authentication
 TODO
