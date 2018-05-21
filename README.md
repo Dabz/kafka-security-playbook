@@ -10,9 +10,9 @@ TODO
 
 ## Kerberos (GSSAPI) authentication without TLS
 This example contains a basic KDC server and configure both zookeeper and kafka with Kerberos and basics ACL. Credentials are created without password, a keytab containing credentials is available in a Docker volume named "secret". The following credential are automatically created in the KDC database:
-1. kafka/admin@TEST.CONFLUENT.IO" - to access zookeeper
-2. kafka_producer/producer@TEST.CONFLUENT.IO"  - to access kafka as a producer
-3. kafka_consumer/consumer@TEST.CONFLUENT.IO"  - to access kafka as a consumer
+1. _kafka/admin@TEST.CONFLUENT.IO_ - to access zookeeper
+2. _kafka_producer/producer@TEST.CONFLUENT.IO_  - to access kafka as a producer
+3. _kafka_consumer/consumer@TEST.CONFLUENT.IO_  - to access kafka as a consumer
 
 ### Usage
 ```bash
