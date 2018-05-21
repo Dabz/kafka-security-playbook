@@ -25,11 +25,11 @@ docker-compose exec kafka bash -c 'kinit -k -t /var/lib/secret/kafka.key kafka_c
 ```
 
 ### Important configuration file
-* [zookeeper properties] (kerberos/zookeeper/zookeeper.properties)
-* [zookeeper server and client jaas configuration] (kerberos/zookeeper/zookeeper.sasl.jaas.config)
-* [kafka server.properties] (kerberos/kafka/server.properties)
-* [kafka server and client jaas configuration] (kerberos/kafka/kafka.sasl.jaas.config)
-* [kafka consumer and producer configuration] (kerberos/kafka/consumer.properties)
+* [zookeeper properties](kerberos/zookeeper/zookeeper.properties)
+* [zookeeper server and client jaas configuration](kerberos/zookeeper/zookeeper.sasl.jaas.config)
+* [kafka server.properties](kerberos/kafka/server.properties)
+* [kafka server and client jaas configuration](kerberos/kafka/kafka.sasl.jaas.config)
+* [kafka consumer and producer configuration](kerberos/kafka/consumer.properties)
 
 
 ## Kerberos (GSSAPI) authentication with TLS
