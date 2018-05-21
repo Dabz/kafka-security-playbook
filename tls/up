@@ -27,7 +27,7 @@ keytool -importkeystore -deststorepass test1234 -destkeystore certs/client.keyst
 keytool -keystore certs/truststore.jks -alias CARoot -import -file certs/ca.crt -storepass test1234  -noprompt -storetype PKCS12 
 
 # Starting docker-compose services
-docker-compose up -d
+docker-compose up -d --build
 
 echo "Example configuration to access kafka:"
 echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka.confluent.local:9093 --topic test --producer.config /etc/kafka/consumer.properties"

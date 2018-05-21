@@ -2,14 +2,14 @@
 
 This repository contains a set of docker images to demonstrate the security configuration of Kafka and the Confluent Platform. The purpose of this repository is **NOT** to provide production's ready images, it has been designed to be used as an example or a base configuration file for your configuration.
 
-All images has been created from scratch without reusing previously created or official images, this, to emphasize code and configuration readability over reusability and best-practices. For more official images, I would recommend you to rely on the [Docker Images for the Confluent Platform](https://github.com/confluentinc/cp-docker-images)
+All images has been created from scratch without reusing previously created images, this, to emphasize code and configuration readability over reusability and best-practices. For more official images, I would recommend you to rely on the [Docker Images for the Confluent Platform](https://github.com/confluentinc/cp-docker-images)
 
 
-## TLS without authentication
-Contains a basic configuration to enforce TLS with a client and server certificate. The _up_ generates the following file prior to start the docker-compose services:
+## TLS with x509 authentication
+Contains a basic configuration to enforce TLS between the broker and a client. The _up_ generates the following file prior to start the docker-compose services:
 1. __certs/ca.key, certs/ca.crt__ - public and private key of the generated self-signed certificate authority
 2. __certs/server.keystore.jks__ - keystore containing the signed certificate for the kafka broker  
-3. __certs/client.keystore.jks__ - keystore containing the signed certificate for a kafka client    
+3. __certs/client.keystore.jks__ - keystore containing the signed certificate for a kafka client, granted kafka super user role   
 
 
 ### Usage
@@ -32,6 +32,9 @@ ssl.truststore.password=test1234
 ssl.keystore.location=/var/lib/secret/server.keystore.jks
 ssl.keystore.password=test1234
 ssl.client.auth=required
+# To use TLS based authorization
+authorizer.class.name=kafka.security.auth.SimpleAclAuthorizer
+super.users=User:CN=kafka.confluent.local,L=London,O=Confluent,C=UK
 ```
 * [kafka consumer and producer configuration](tls/kafka/consumer.properties)
 ```
@@ -127,6 +130,3 @@ sasl.kerberos.service.name=kafka
 sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required \
 								 useTicketCache=true
 ```
-
-## Scram authentication
-TODO
