@@ -21,7 +21,7 @@ docker-compose exec kafka kafka-console-producer --broker-list kafka.confluent.l
 docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka.confluent.local:9093 --topic test --consumer.config /etc/kafka/consumer.properties --from-beginning
 ```
 
-### Important configuration file
+### Important configuration files
 * [kafka server.properties](tls/kafka/server.properties)
 ```
 listeners=SSL://kafka.confluent.local:9093
@@ -47,6 +47,11 @@ ssl.keystore.password=test1234
 ssl.key.password=test1234
 ```
 
+#### For further information
+* [kafka documentation on TLS](http://kafka.apache.org/documentation.html#security_ssl)
+* [Confluent documentation on TLS authentication](https://docs.confluent.io/current/kafka/authentication_ssl.html)
+* [Confluent documentation on TLS key generation](https://docs.confluent.io/current/tutorials/security_tutorial.html#generating-keys-certs)
+
 ## Kerberos (GSSAPI) authentication without TLS
 This example contains a basic KDC server and configure both zookeeper and kafka with Kerberos and basics ACL. Credentials are created without password, a keytab containing credentials is available in a Docker volume named "secret". The following credential are automatically created in the KDC database:
 1. __kafka/admin__ - to access zookeeper
@@ -63,7 +68,7 @@ docker-compose exec kafka bash -c 'kinit -k -t /var/lib/secret/kafka.key kafka_p
 docker-compose exec kafka bash -c 'kinit -k -t /var/lib/secret/kafka.key kafka_consumer/consumer && kafka-console-consumer --bootstrap-server kafka:9093 --topic test --consumer.config /etc/kafka/consumer.properties --from-beginning'
 ```
 
-### Important configuration file
+### Important configuration files
 * [zookeeper properties](kerberos/zookeeper/zookeeper.properties)
 ```
 authProvider.1 = org.apache.zookeeper.server.auth.SASLAuthenticationProvider
@@ -96,6 +101,9 @@ authorizer.class.name=kafka.security.auth.SimpleAclAuthorizer
 
 * [kafka server and client jaas configuration](kerberos/kafka/kafka.sasl.jaas.config)
 ```
+/*
+ * Cluster kerberos services 
+ */
 KafkaServer {
     com.sun.security.auth.module.Krb5LoginModule required
     useKeyTab=true
@@ -104,6 +112,9 @@ KafkaServer {
     principal="kafka/kafka.kerberos_default@TEST.CONFLUENT.IO";
 };
 
+/*
+ * For client and broker identificatoin
+ */ 
 KafkaClient {
     com.sun.security.auth.module.Krb5LoginModule required
     useKeyTab=true
@@ -112,6 +123,9 @@ KafkaClient {
     principal="admin/kafka.kerberos_default@TEST.CONFLUENT.IO";
 };
 
+/*
+ * For Zookeeper authentication
+ */
 Client {
     com.sun.security.auth.module.Krb5LoginModule required
     useKeyTab=true
@@ -130,3 +144,8 @@ sasl.kerberos.service.name=kafka
 sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required \
 								 useTicketCache=true
 ```
+
+
+#### For further information
+* [Confluent documentation on GSSAPI authentication](https://docs.confluent.io/current/kafka/authentication_sasl_gssapi.html)
+* [Confluent documentation on ACL](https://docs.confluent.io/current/kafka/authorization.html)
