@@ -1,8 +1,8 @@
 # Kafka security playbook
 
-This repository contains a set of docker images to demonstrate the security configuration of Kafka and the Confluent Platform. The purpose of this repository is *NOT* to provide production's ready images, it has been designed to be used as an example or a base configuration file for your configuration.
+This repository contains a set of docker images to demonstrate the security configuration of Kafka and the Confluent Platform. The purpose of this repository is **NOT** to provide production's ready images, it has been designed to be used as an example or a base configuration file for your configuration.
 
-All images has been created from scratch without reusing previously created or official images, this, to emphasize code and configuration readability over reusability and best-practices. For more official images, I would recommend you to rely on the [Docker Images for the Confluent Platform] (https://github.com/confluentinc/cp-docker-images)
+All images has been created from scratch without reusing previously created or official images, this, to emphasize code and configuration readability over reusability and best-practices. For more official images, I would recommend you to rely on the [Docker Images for the Confluent Platform](https://github.com/confluentinc/cp-docker-images)
 
 
 ## TLS without authentication
