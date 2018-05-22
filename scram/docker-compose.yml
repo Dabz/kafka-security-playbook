@@ -1,0 +1,19 @@
+version: '3'
+services:
+
+  zookeeper:
+    build: zookeeper/
+    container_name: zookeeper
+    hostname: zookeeper
+    restart: on-failure
+    environment:
+      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf 
+
+  kafka:
+    build: kafka/
+    container_name: kafka
+    environment:
+      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf 
+    depends_on: 
+      - zookeeper
+    restart: on-failure

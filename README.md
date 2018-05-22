@@ -4,6 +4,38 @@ This repository contains a set of docker images to demonstrate the security conf
 
 All images has been created from scratch without reusing previously created images, this, to emphasize code and configuration readability over reusability and best-practices. For more official images, I would recommend you to rely on the [Docker Images for the Confluent Platform](https://github.com/confluentinc/cp-docker-images)
 
+## Scram authentication (challenge response)
+Contains a simple configuration where SASL-Scram authentication is used for Zookeeper and Kafka.
+
+### Usage
+```bash
+cd scram
+# Scripts starting the docker services and generating the kafka user
+./up
+docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --producer.config /etc/kafka/consumer.properties --topic test
+docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config /etc/kafka/consumer.properties --topic test --from-beginning
+```
+
+### Important configuration files
+* [kafka server.properties](scram/kafka/server.properties)
+```
+sasl.enabled.mechanisms=SCRAM-SHA-256
+sasl.mechanism.inter.broker.protocol=SCRAM-SHA-256
+security.inter.broker.protocol=SASL_PLAINTEXT
+authorizer.class.name=kafka.security.auth.SimpleAclAuthorizer
+```
+* [kafka consumer and producer configuration](scram/kafka/consumer.properties)
+```
+sasl.mechanism=SCRAM-SHA-256
+security.protocol=SASL_PLAINTEXT
+sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required \
+  username="kafka" \
+  password="kafka";
+```
+
+#### For further information
+* [Confluent documentation on SASL Scram](https://docs.confluent.io/current/kafka/authentication_sasl_scram.html)
+* [Zookeeper documentation on SASL Scram](https://cwiki.apache.org/confluence/display/ZOOKEEPER/Client-Server+mutual+authentication)
 
 ## TLS with x509 authentication
 Contains a basic configuration to enforce TLS between the broker and a client. The _up_ generates the following file prior to start the docker-compose services:
@@ -102,7 +134,7 @@ authorizer.class.name=kafka.security.auth.SimpleAclAuthorizer
 * [kafka server and client jaas configuration](kerberos/kafka/kafka.sasl.jaas.config)
 ```
 /*
- * Cluster kerberos services 
+ * Cluster kerberos services
  */
 KafkaServer {
     com.sun.security.auth.module.Krb5LoginModule required
@@ -114,7 +146,7 @@ KafkaServer {
 
 /*
  * For client and broker identificatoin
- */ 
+ */
 KafkaClient {
     com.sun.security.auth.module.Krb5LoginModule required
     useKeyTab=true
