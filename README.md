@@ -46,10 +46,10 @@ sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule require
 
 ## TLS with x509 authentication
 TLS, previously known as SSL, is a cryptography protocol providing network encryption via asymetric certificates and keys.
-This playbook contains a basic configuration to enforce TLS between the broker and a client. Be aware that right now zookeeper didn't release TLS as an official feature, thus only the broker is configured for TLS. In this playbook, TLS is used for both encryption, authentication and authorization. the _up_ generates the following file prior to start the docker-compose services:
-1. __certs/ca.key, certs/ca.crt__ - public and private key of the generated self-signed certificate authority
-2. __certs/server.keystore.jks__ - keystore containing the signed certificate for the kafka broker  
-3. __certs/client.keystore.jks__ - keystore containing the signed certificate for a kafka client, granted kafka super user role   
+This playbook contains a basic configuration to enforce TLS between the broker and a client. Be aware that right now zookeeper didn't release TLS as an official feature, thus only the broker is configured for TLS. In this playbook, TLS is used for both encryption, authentication and authorization. the _up_ script generates the following file before starting docker-compose services:
+1. __certs/ca.key, certs/ca.crt__ - public and private key of the certificate authority
+2. __certs/server.keystore.jks__ - keystore containing the signed certificate of the kafka broker  
+3. __certs/client.keystore.jks__ - keystore containing the signed certificate of a kafka client. It has been granted super user permision   
 
 
 ### Usage
@@ -97,7 +97,7 @@ ssl.key.password=test1234
 * [Confluent documentation on TLS key generation](https://docs.confluent.io/current/tutorials/security_tutorial.html#generating-keys-certs)
 
 ## Kerberos (GSSAPI) authentication without TLS
-This example contains a basic KDC server and configure both zookeeper and kafka with Kerberos. Credentials are created without password, a keytab containing credentials is available in a Docker volume named "secret". The following credential are automatically created in the KDC database:
+This example contains a basic KDC server and configure both zookeeper and kafka with Kerberos authentication and authorization. Credentials are created without password, a keytab containing credentials is available in a Docker volume named "secret". The following credential are automatically created in the KDC database:
 1. __kafka/admin__ - to access zookeeper
 2. __kafka_producer/producer__  - to access kafka as a producer
 3. __kafka_consumer/consumer__  - to access kafka as a consumer
