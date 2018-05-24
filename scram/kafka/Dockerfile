@@ -12,7 +12,6 @@ RUN yum install -y java-1.8.0-openjdk
 RUN yum install -y confluent-kafka-2.11
 
 # 3. Configure Kafka and zookeeper for Kerberos 
-RUN yum install -y krb5-workstation krb5-libs 
 COPY server.properties /etc/kafka/server.properties
 COPY kafka.sasl.jaas.config /etc/kafka/kafka_server_jaas.conf
 COPY consumer.properties /etc/kafka/consumer.properties

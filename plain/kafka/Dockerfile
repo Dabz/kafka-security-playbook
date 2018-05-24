@@ -1,5 +1,5 @@
 FROM centos
-MAINTAINER d.gasparina@gmail.com
+MAINTAINER seknop@gmail.com
 ENV container docker
 
 # 1. Adding Confluent repository
@@ -12,9 +12,10 @@ RUN yum install -y java-1.8.0-openjdk
 RUN yum install -y confluent-kafka-2.11
 
 # 3. Configure Kafka and zookeeper for Kerberos 
-COPY zookeeper.properties /etc/kafka/zookeeper.properties
-COPY zookeeper.sasl.jaas.config /etc/kafka/zookeeper_server_jaas.conf
+COPY server.properties /etc/kafka/server.properties
+COPY kafka.jaas.config /etc/kafka/kafka_server_jaas.conf
+COPY consumer.properties /etc/kafka/consumer.properties
 
-EXPOSE 2181
+EXPOSE 9093
 
-CMD zookeeper-server-start /etc/kafka/zookeeper.properties 
+CMD kafka-server-start /etc/kafka/server.properties
