@@ -4,6 +4,58 @@ This repository contains a set of docker images to demonstrate the security conf
 
 All images has been created from scratch without reusing previously created images, this, to emphasize code and configuration readability over best-practices. For official images, I would recommend you to rely on the [Docker Images for the Confluent Platform](https://github.com/confluentinc/cp-docker-images)
 
+## Plain authentication (challenge response)
+Pain authentication is a simple mechanism based on username/password. It should be used with TLS for encryption to implement secure authentication. This playbook contains a simple configuration where SASL-Plain authentication is used for Kafka.
+
+### Usage
+```bash
+cd plain
+./up
+kafka-console-producer --broker-list kafka:9093 --producer.config /etc/kafka/consumer.properties --topic test
+kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config /etc/kafka/consumer.properties --topic test --from-beginning
+```
+
+### Important configuration files
+<details>
+<summary><a href="plain/kafka/server.properties">kafka server.properties</a></summary>,
+<pre>
+sasl.enabled.mechanisms=PLAIN
+sasl.mechanism.inter.broker.protocol=PLAIN
+allow.everyone.if.no.acl.found=false
+super.users=User:kafka
+authorizer.class.name=kafka.security.auth.SimpleAclAuthorizer
+</pre>
+</details>
+
+<details>
+<summary><a href="plain/kafka/consumer.properties">kafka consumer and producer configuration</a></summary>
+<pre>
+sasl.mechanism=PLAIN
+security.protocol=SASL_PLAINTEXT
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
+  username="kafka" \
+password="kafka";
+</pre>
+</details>
+
+<details>
+<summary><a href="plain/kafka/kafka.jaas.config">kafka server jaas configuration</a></summary>
+<pre>
+KafkaServer {
+   org.apache.kafka.common.security.plain.PlainLoginModule required
+   username="kafka"
+   password="kafka"
+   user_kafka="kafka"
+   user_producer="producer-secret"
+   user_consumer="consumer-secret";
+};
+</pre>
+</details>
+
+#### For further information
+* [Confluent documentation on SASL Plain](https://docs.confluent.io/current/kafka/authentication_sasl_plain.html)
+
+
 ## Scram authentication (challenge response)
 Scram is an authentication mechanism that perform username/password authentication in a secure way. This playbook contains a simple configuration where SASL-Scram authentication is used for Zookeeper and Kafka. In it:
 * kafka use a username/password to connect to zookeeper
@@ -37,6 +89,17 @@ security.protocol=SASL_PLAINTEXT
 sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required \
   username="kafka" \
   password="kafka";
+</pre>
+</details>
+
+<details>
+<summary><a href="scram/kafka/kafka.sasl.jaas.config">kafka server jaas configuration</a></summary>
+<pre>
+KafkaServer {
+   org.apache.kafka.common.security.scram.ScramLoginModule required
+   username="kafka"
+   password="kafka";
+};
 </pre>
 </details>
 	
