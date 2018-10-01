@@ -29,6 +29,24 @@ services:
         aliases:
           - kafka.confluent.local
 
+  schema-registry:
+    build: schema-registry/
+    container_name: schema-registry
+    hostname: schema-registry
+    domainname: confluent.local
+    depends_on: 
+      - kafka
+    restart: on-failure
+    volumes:
+      - ./certs/:/var/lib/secret
+      - ./schema-registry/schema-registry.properties:/etc/schema-registry/schema-registry.properties
+    networks:
+      default:
+        aliases:
+          - schema-registry.confluent.local
+    ports:
+      - "8081:8081"
+
 volumes:
   secret: {}
 
