@@ -28,6 +28,10 @@ services:
       default:
         aliases:
           - kafka.confluent.local
+    ports:
+      - "9093:9093"
+    environment:
+      SCHEMA_REGISTRY_OPTS: '-Djavax.net.ssl.keyStore=/var/lib/secret/client.keystore.jks -Djavax.net.ssl.trustStore=/var/lib/secret/truststore.jks -Djavax.net.ssl.keyStorePassword=test1234 -Djavax.net.ssl.trustStorePassword=test1234'
 
   schema-registry:
     build: schema-registry/
@@ -45,7 +49,7 @@ services:
         aliases:
           - schema-registry.confluent.local
     ports:
-      - "8081:8081"
+      - "8443:8443"
 
 volumes:
   secret: {}

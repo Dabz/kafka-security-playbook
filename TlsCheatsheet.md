@@ -23,6 +23,18 @@ openssl req -new -newkey rsa:2048 -keyout server.key -out server.csr -config $CO
 openssl req -text -in $CERT
 ```
 
+## Displaying content of a certificate that a server presents
+
+```bash
+openssl s_client -showcerts -connect www.example.com:443
+```
+
+## Verifying that server certificate was singed by a CA
+
+```bash
+curl --cacert /var/lib/secret/ca.pem https://www.example:8443
+```
+
 ## Signing certificate signing request
 
 ```bash

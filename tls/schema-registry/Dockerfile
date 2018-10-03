@@ -14,6 +14,6 @@ RUN yum install -y confluent-schema-registry confluent-security
 # 3. Configure Kafka 
 COPY schema-registry.properties /etc/schema-registry/schema-registry.properties
 
-EXPOSE 8081
+EXPOSE 8443
 
 CMD schema-registry-start /etc/schema-registry/schema-registry.properties

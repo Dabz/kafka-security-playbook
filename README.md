@@ -122,6 +122,26 @@ cd tls
 ./up
 docker-compose exec kafka kafka-console-producer --broker-list kafka.confluent.local:9093 --topic test --producer.config /etc/kafka/consumer.properties
 docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka.confluent.local:9093 --topic test --consumer.config /etc/kafka/consumer.properties --from-beginning
+
+#Avro consumer/producer using schema registry
+docker-compose exec kafka kafka-avro-console-producer --broker-list kafka.confluent.local:9093 --topic avro_test --property value.schema='{"type":"record","name":"myrecord","fields":[{"name":"f1","type":"string"}]}' --property schema.registry.url=https://schema-registry.confluent.local:8443 --producer.config /etc/kafka/consumer.properties
+#example message: {"f1": "value1"}
+kafka-avro-console-consumer --topic avro_test --from-beginning --property schema.registry.url=https://schema-registry.confluent.local:8443 --consumer.config /etc/kafka/consumer.properties --bootstrap-server kafka.confluent.local:9093
+
+```
+
+To connect from a producer/consumer running on your local machine:
+
+```bash
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper.confluent.local:2181 --add --allow-principal User:CN=<YOUR LOCAL HOSTNAME>,L=London,O=Confluent,C=UK --operation All --topic '*' --cluster;
+```
+Set the following JVM parameters:
+
+```
+-Djavax.net.ssl.keyStore=<kafka-security-playbook DIR>/tls/certs/local-client.keystore.jks
+-Djavax.net.ssl.trustStore=<kafka-security-playbook DIR>/tls/certs/truststore.jks
+-Djavax.net.ssl.keyStorePassword=test1234
+-Djavax.net.ssl.trustStorePassword=test1234
 ```
 
 ### Important configuration files
