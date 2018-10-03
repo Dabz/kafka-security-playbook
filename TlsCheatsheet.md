@@ -29,7 +29,7 @@ openssl req -text -in $CERT
 openssl s_client -showcerts -connect www.example.com:443
 ```
 
-## Verifying that server certificate was singed by a CA
+## Verifying that server certificate was signed by a CA
 
 ```bash
 curl --cacert /var/lib/secret/ca.pem https://www.example:8443
