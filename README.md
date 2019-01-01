@@ -284,3 +284,11 @@ sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required \
 #### For further information
 * [Confluent documentation on GSSAPI authentication](https://docs.confluent.io/current/kafka/authentication_sasl_gssapi.html)
 * [Confluent documentation on ACL](https://docs.confluent.io/current/kafka/authorization.html)
+
+## Unsecured Oauth authentication
+
+Kafka supports SASL authentication via Oauth bearer tokens. A sample playbook for unsecured oauth token verification is contained in the oauth subfolder of this repository. Unsecured oauth is not suitable for production. To use oauth in production, java interfaces must be implemented for obtaining and validating secure oauth bearer tokens. 
+
+### Further information
+
+* [Confluent documentation on Oauth authentication] (https://docs.confluent.io/current/kafka/authentication_sasl/authentication_sasl_oauth.html)
