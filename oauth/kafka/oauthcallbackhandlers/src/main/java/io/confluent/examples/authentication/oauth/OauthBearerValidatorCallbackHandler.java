@@ -16,6 +16,8 @@ public class OauthBearerValidatorCallbackHandler implements AuthenticateCallback
 
     private final Logger log = LoggerFactory.getLogger(OauthBearerValidatorCallbackHandler.class);
 
+    private JwtHelper jwtHelper = new JwtHelper();
+
     @Override
     public void configure(Map<String, ?> configs, String saslMechanism, List<AppConfigurationEntry> jaasConfigEntries) {
 
@@ -33,9 +35,7 @@ public class OauthBearerValidatorCallbackHandler implements AuthenticateCallback
             if (callback instanceof OAuthBearerValidatorCallback) {
                 OAuthBearerValidatorCallback oAuthBearerValidatorCallback = (OAuthBearerValidatorCallback) callback;
                 log.info("Tokenvalue: {}", oAuthBearerValidatorCallback.tokenValue());
-                oAuthBearerValidatorCallback.token(new MyOauthBearerToken());
-                log.warn("Not yet implemented");
-                ((OAuthBearerValidatorCallback) callback).token(new MyOauthBearerToken());
+                oAuthBearerValidatorCallback.token(jwtHelper.validate(oAuthBearerValidatorCallback.tokenValue()));
                 continue;
             }
             throw new UnsupportedCallbackException(callback);

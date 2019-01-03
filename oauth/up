@@ -3,7 +3,7 @@
 set -x
 set -u
 
-pushd kafka/adapter
+pushd kafka/oauthcallbackhandlers
 mvn clean package
 popd
 
