@@ -1,11 +1,14 @@
 #!/bin/sh
 
+set -x
+set -u
+
+pushd kafka/adapter
+mvn clean package
+popd
+
 docker-compose up -d --build
 
-# Creating the user kafka
-# kafka is configured as a super user, no need for additional ACL
-# docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-255=[password=kafka],SCRAM-SHA-512=[password=kafka]' --entity-type users --entity-name kafka
+sleep 5
 
-echo "Example configuration:"
-echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --topic test --producer.config /etc/kafka/client.properties"
-echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:9093 --topic test --from-beginning --consumer.config /etc/kafka/client.properties"
+docker-compose exec kafka /tmp/test_produce_and_consume.sh

@@ -15,6 +15,8 @@ RUN yum install -y confluent-kafka-2.11
 COPY server.properties /etc/kafka/server.properties
 COPY client.properties /etc/kafka/client.properties
 COPY kafka_server_jaas.conf /etc/kafka/kafka_server_jaas.conf
+COPY adapter/target/dummy-oauth-adapter-0.1.0.jar /usr/share/java/kafka/dummy-oauth-adapter-0.1.0.jar
+COPY test_produce_and_consume.sh /tmp/test_produce_and_consume.sh
 
 EXPOSE 9093
 
