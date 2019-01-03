@@ -39,5 +39,4 @@ public class JwtHelper {
         return token;
     }
 
-
 }
