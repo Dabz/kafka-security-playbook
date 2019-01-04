@@ -18,6 +18,12 @@ COPY kafka_server_jaas.conf /etc/kafka/kafka_server_jaas.conf
 COPY oauthcallbackhandlers/target/dummy-oauth-adapter-0.1.0-jar-with-dependencies.jar /usr/share/java/kafka/dummy-oauth-adapter-0.1.0-jar-with-dependencies.jar
 COPY test_produce_and_consume.sh /tmp/test_produce_and_consume.sh
 
+# 4. Put SSL certificates in place
+COPY kafka.server.keystore.jks /etc/kafka/kafka.server.keystore.jks
+COPY kafka.server.truststore.jks /etc/kafka/kafka.server.truststore.jks
+# this will be used by the kafka-console-producer.sh and kafka-console-consumer.sh scripts
+COPY kafka.client.truststore.jks /etc/kafka/kafka.client.truststore.jks
+
 EXPOSE 9093
 
 CMD kafka-server-start /etc/kafka/server.properties

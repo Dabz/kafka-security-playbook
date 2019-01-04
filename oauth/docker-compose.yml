@@ -4,13 +4,26 @@ services:
   zookeeper:
     build: zookeeper/
     container_name: zookeeper
+    domainname: confluent.local
     hostname: zookeeper
+    networks:
+      default:
+        aliases:
+          - zookeeper.confluent.local
 
   kafka:
     build: kafka/
     container_name: kafka
+    domainname: confluent.local
+    hostname: kafka
     depends_on: 
       - zookeeper
     environment:
       - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf
+    networks:
+      default:
+        aliases:
+          - kafka.confluent.local
 
+networks:
+  default:
