@@ -302,7 +302,7 @@ In this sample playbook both the identity of brokers (`sasl.mechanism.inter.brok
 
 Within this sample playbook oauth bearer tokens are generated and validated using the `jjwt` library without communication to an authorization server. In real life, this would be different.
 
-The class `OauthBearerLoginCallbackHandler` is used by the `kafka-console-producer`, `kafka-console-consumer` clients and by kafka brokers themselves to generate a JWT token using a shared secret. This class is configured within the `client.properties file:
+The class `OauthBearerLoginCallbackHandler` is used by the clients and by brokers to generate a JWT token using a shared secret. This class is configured within the `client.properties file:
 
 Note that the client does not need to have a keystore configured, since client authentication is achieved using bearer tokens. 
 Still it needs a truststore to verify the identity of the brokers. 
