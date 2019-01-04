@@ -342,5 +342,5 @@ Kafka brokers need a keystore to store its private certificate as well as a trus
 
 ### Further information
 
-* [Confluent documentation on Oauth authentication] (https://docs.confluent.io/current/kafka/authentication_sasl/authentication_sasl_oauth.html)
-* [Blog Post] (https://medium.com/@jairsjunior/how-to-setup-oauth2-mechanism-to-a-kafka-broker-e42e72839fe)
+* [Confluent documentation on Oauth authentication](https://docs.confluent.io/current/kafka/authentication_sasl/authentication_sasl_oauth.html)
+* [Blog Post](https://medium.com/@jairsjunior/how-to-setup-oauth2-mechanism-to-a-kafka-broker-e42e72839fe)
