@@ -284,3 +284,63 @@ sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required \
 #### For further information
 * [Confluent documentation on GSSAPI authentication](https://docs.confluent.io/current/kafka/authentication_sasl_gssapi.html)
 * [Confluent documentation on ACL](https://docs.confluent.io/current/kafka/authorization.html)
+
+## Oauth authentication via TLS encryption
+
+Kafka supports SASL authentication via Oauth bearer tokens. A sample playbook for secured oauth token authentication is contained in the oauth subfolder of this repository. 
+
+### Usage
+
+Prerequisites: jdk8, maven, docker-compose, openssl.
+ 
+```bash
+cd oauth
+./up
+```
+
+In this sample playbook both the identity of brokers (`sasl.mechanism.inter.broker.protocol=OAUTHBEARER` within server.properties) and the identity of clients (`sasl.mechanism=OAUTHBEARER` within consumer.properties) are verified by the brokers using oauth bearer tokens. 
+
+Within this sample playbook oauth bearer tokens are generated and validated using the `jjwt` library without communication to an authorization server. In real life, this would be different.
+
+The class `OauthBearerLoginCallbackHandler` is used by the clients and by brokers to generate a JWT token using a shared secret. This class is configured within the `client.properties file:
+
+Note that the client does not need to have a keystore configured, since client authentication is achieved using bearer tokens. 
+Still it needs a truststore to store the brokers certificate authorities. 
+
+<details>
+	<summary><a href="oauth/kafka/client.properties">kafka consumer and prodcuer configuration</a></summary>
+<pre>
+security.protocol=SASL_SSL
+sasl.mechanism=OAUTHBEARER
+sasl.login.callback.handler.class=io.confluent.examples.authentication.oauth.OauthBearerLoginCallbackHandler
+ssl.truststore.location=/etc/kafka/kafka.client.truststore.jks
+ssl.truststore.password=secret
+</pre>
+</details>
+
+The `OauthBearerLoginCallbackHandler` class is also configured for broker clients within the `server.properties` file (see below). The `server.properties` file must also include a reference to the token validator class (`OauthBearerValidatorCallbackHandler`):
+
+<details>
+	<summary><a href="oauth/kafka/server.properties">kafka broker configuration</a></summary>
+<pre>
+listeners=SASL_SSL://kafka.confluent.local:9093
+advertised.listeners=SASL_SSL://kafka.confluent.local:9093
+security.inter.broker.protocol=SASL_SSL
+sasl.mechanism.inter.broker.protocol=OAUTHBEARER
+sasl.enabled.mechanisms=OAUTHBEARER
+listener.name.sasl_ssl.oauthbearer.sasl.server.callback.handler.class=io.confluent.examples.authentication.oauth.OauthBearerValidatorCallbackHandler
+listener.name.sasl_ssl.oauthbearer.sasl.login.callback.handler.class=io.confluent.examples.authentication.oauth.OauthBearerLoginCallbackHandler
+ssl.truststore.location=/etc/kafka/kafka.server.truststore.jks
+ssl.truststore.password=secret
+ssl.keystore.location=/etc/kafka/kafka.server.keystore.jks
+ssl.keystore.password=secret
+ssl.key.password=secret
+</pre>
+</details>
+
+Kafka brokers need a keystore to store its private certificate as well as a truststore to verify the identity of other brokers. 
+
+### Further information
+
+* [Confluent documentation on Oauth authentication] (https://docs.confluent.io/current/kafka/authentication_sasl/authentication_sasl_oauth.html)
+* [Blog Post] (https://medium.com/@jairsjunior/how-to-setup-oauth2-mechanism-to-a-kafka-broker-e42e72839fe)

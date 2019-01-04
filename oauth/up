@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+set -u
+
+pushd kafka/oauthcallbackhandlers
+mvn clean package
+popd
+
+./generate_certs.sh
+
+docker-compose up -d --build
+
+sleep 5
+
+docker-compose exec kafka /tmp/test_produce_and_consume.sh
