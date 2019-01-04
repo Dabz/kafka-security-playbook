@@ -305,7 +305,7 @@ Within this sample playbook oauth bearer tokens are generated and validated usin
 The class `OauthBearerLoginCallbackHandler` is used by the clients and by brokers to generate a JWT token using a shared secret. This class is configured within the `client.properties file:
 
 Note that the client does not need to have a keystore configured, since client authentication is achieved using bearer tokens. 
-Still it needs a truststore to verify the identity of the brokers. 
+Still it needs a truststore to store the brokers certificate authorities. 
 
 <details>
 	<summary><a href="oauth/kafka/client.properties">kafka consumer and prodcuer configuration</a></summary>
@@ -338,7 +338,7 @@ ssl.key.password=secret
 </pre>
 </details>
 
-Kafka brokers need both a keystore configured to identify themselves to clients and other brokers as well as a truststore to verify the identity of broker clients. 
+Kafka brokers need a keystore to store its private certificate as well as a truststore to verify the identity of other brokers. 
 
 ### Further information
 
