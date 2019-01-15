@@ -9,14 +9,11 @@ RUN yum clean all
 
 # 2. Install zookeeper and kafka
 RUN yum install -y java-1.8.0-openjdk
-RUN yum install -y confluent-kafka-2.11
-#schema-registry package is rquiterd to run kafka-avro-console-producer
-RUN yum install -y confluent-schema-registry
+RUN yum install -y confluent-schema-registry confluent-security
 
 # 3. Configure Kafka 
-COPY server.properties /etc/kafka/server.properties
-COPY consumer.properties /etc/kafka/consumer.properties
+COPY schema-registry.properties /etc/schema-registry/schema-registry.properties
 
-EXPOSE 9093
+EXPOSE 8443
 
-CMD kafka-server-start /etc/kafka/server.properties
+CMD schema-registry-start /etc/schema-registry/schema-registry.properties

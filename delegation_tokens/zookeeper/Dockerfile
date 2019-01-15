@@ -1,9 +1,9 @@
 FROM centos
-MAINTAINER seknop@gmail.com
+MAINTAINER d.gasparina@gmail.com
 ENV container docker
 
 # 1. Adding Confluent repository
-RUN rpm --import https://packages.confluent.io/rpm/4.1/archive.key
+RUN rpm --import https://packages.confluent.io/rpm/5.1/archive.key
 COPY confluent.repo /etc/yum.repos.d/confluent.repo
 RUN yum clean all
 
@@ -11,8 +11,9 @@ RUN yum clean all
 RUN yum install -y java-1.8.0-openjdk
 RUN yum install -y confluent-kafka-2.11
 
-# 3. Configure Kafka and zookeeper for Kerberos 
+# 3. Configure zookeeper
 COPY zookeeper.properties /etc/kafka/zookeeper.properties
+COPY zookeeper.sasl.jaas.config /etc/kafka/zookeeper_server_jaas.conf
 
 EXPOSE 2181
 

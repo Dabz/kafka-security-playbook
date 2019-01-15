@@ -4,6 +4,58 @@ This repository contains a set of docker images to demonstrate the security conf
 
 All images has been created from scratch without reusing previously created images, this, to emphasize code and configuration readability over best-practices. For official images, I would recommend you to rely on the [Docker Images for the Confluent Platform](https://github.com/confluentinc/cp-docker-images)
 
+## Plain authentication (challenge response)
+Plain authentication is a simple mechanism based on username/password. It should be used with TLS for encryption to implement secure authentication. This playbook contains a simple configuration where SASL-Plain authentication is used for Kafka.
+
+### Usage
+```bash
+cd plain
+./up
+kafka-console-producer --broker-list kafka:9093 --producer.config /etc/kafka/consumer.properties --topic test
+kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config /etc/kafka/consumer.properties --topic test --from-beginning
+```
+
+### Important configuration files
+<details>
+<summary><a href="plain/kafka/server.properties">kafka server.properties</a></summary>,
+<pre>
+sasl.enabled.mechanisms=PLAIN
+sasl.mechanism.inter.broker.protocol=PLAIN
+allow.everyone.if.no.acl.found=false
+super.users=User:kafka
+authorizer.class.name=kafka.security.auth.SimpleAclAuthorizer
+</pre>
+</details>
+
+<details>
+<summary><a href="plain/kafka/consumer.properties">kafka consumer and producer configuration</a></summary>
+<pre>
+sasl.mechanism=PLAIN
+security.protocol=SASL_PLAINTEXT
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
+  username="kafka" \
+password="kafka";
+</pre>
+</details>
+
+<details>
+<summary><a href="plain/kafka/kafka.jaas.config">kafka server jaas configuration</a></summary>
+<pre>
+KafkaServer {
+   org.apache.kafka.common.security.plain.PlainLoginModule required
+   username="kafka"
+   password="kafka"
+   user_kafka="kafka"
+   user_producer="producer-secret"
+   user_consumer="consumer-secret";
+};
+</pre>
+</details>
+
+#### For further information
+* [Confluent documentation on SASL Plain](https://docs.confluent.io/current/kafka/authentication_sasl_plain.html)
+
+
 ## Scram authentication (challenge response)
 Scram is an authentication mechanism that perform username/password authentication in a secure way. This playbook contains a simple configuration where SASL-Scram authentication is used for Zookeeper and Kafka. In it:
 * kafka use a username/password to connect to zookeeper
@@ -39,6 +91,17 @@ sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule require
   password="kafka";
 </pre>
 </details>
+
+<details>
+<summary><a href="scram/kafka/kafka.sasl.jaas.config">kafka server jaas configuration</a></summary>
+<pre>
+KafkaServer {
+   org.apache.kafka.common.security.scram.ScramLoginModule required
+   username="kafka"
+   password="kafka";
+};
+</pre>
+</details>
 	
 #### For further information
 * [Confluent documentation on SASL Scram](https://docs.confluent.io/current/kafka/authentication_sasl_scram.html)
@@ -59,6 +122,26 @@ cd tls
 ./up
 docker-compose exec kafka kafka-console-producer --broker-list kafka.confluent.local:9093 --topic test --producer.config /etc/kafka/consumer.properties
 docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka.confluent.local:9093 --topic test --consumer.config /etc/kafka/consumer.properties --from-beginning
+
+#Avro consumer/producer using schema registry
+docker-compose exec kafka kafka-avro-console-producer --broker-list kafka.confluent.local:9093 --topic avro_test --property value.schema='{"type":"record","name":"myrecord","fields":[{"name":"f1","type":"string"}]}' --property schema.registry.url=https://schema-registry.confluent.local:8443 --producer.config /etc/kafka/consumer.properties
+#example message: {"f1": "value1"}
+kafka-avro-console-consumer --topic avro_test --from-beginning --property schema.registry.url=https://schema-registry.confluent.local:8443 --consumer.config /etc/kafka/consumer.properties --bootstrap-server kafka.confluent.local:9093
+
+```
+
+To connect from a producer/consumer running on your local machine:
+
+```bash
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper.confluent.local:2181 --add --allow-principal User:CN=<YOUR LOCAL HOSTNAME>,L=London,O=Confluent,C=UK --operation All --topic '*' --cluster;
+```
+Set the following JVM parameters:
+
+```
+-Djavax.net.ssl.keyStore=<kafka-security-playbook DIR>/tls/certs/local-client.keystore.jks
+-Djavax.net.ssl.trustStore=<kafka-security-playbook DIR>/tls/certs/truststore.jks
+-Djavax.net.ssl.keyStorePassword=test1234
+-Djavax.net.ssl.trustStorePassword=test1234
 ```
 
 ### Important configuration files
@@ -201,3 +284,63 @@ sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required \
 #### For further information
 * [Confluent documentation on GSSAPI authentication](https://docs.confluent.io/current/kafka/authentication_sasl_gssapi.html)
 * [Confluent documentation on ACL](https://docs.confluent.io/current/kafka/authorization.html)
+
+## Oauth authentication via TLS encryption
+
+Kafka supports SASL authentication via Oauth bearer tokens. A sample playbook for secured oauth token authentication is contained in the oauth subfolder of this repository. 
+
+### Usage
+
+Prerequisites: jdk8, maven, docker-compose, openssl.
+ 
+```bash
+cd oauth
+./up
+```
+
+In this sample playbook both the identity of brokers (`sasl.mechanism.inter.broker.protocol=OAUTHBEARER` within server.properties) and the identity of clients (`sasl.mechanism=OAUTHBEARER` within consumer.properties) are verified by the brokers using oauth bearer tokens. 
+
+Within this sample playbook oauth bearer tokens are generated and validated using the `jjwt` library without communication to an authorization server. In real life, this would be different.
+
+The class `OauthBearerLoginCallbackHandler` is used by the clients and by brokers to generate a JWT token using a shared secret. This class is configured within the `client.properties file:
+
+Note that the client does not need to have a keystore configured, since client authentication is achieved using bearer tokens. 
+Still it needs a truststore to store the brokers certificate authorities. 
+
+<details>
+	<summary><a href="oauth/kafka/client.properties">kafka consumer and prodcuer configuration</a></summary>
+<pre>
+security.protocol=SASL_SSL
+sasl.mechanism=OAUTHBEARER
+sasl.login.callback.handler.class=io.confluent.examples.authentication.oauth.OauthBearerLoginCallbackHandler
+ssl.truststore.location=/etc/kafka/kafka.client.truststore.jks
+ssl.truststore.password=secret
+</pre>
+</details>
+
+The `OauthBearerLoginCallbackHandler` class is also configured for broker clients within the `server.properties` file (see below). The `server.properties` file must also include a reference to the token validator class (`OauthBearerValidatorCallbackHandler`):
+
+<details>
+	<summary><a href="oauth/kafka/server.properties">kafka broker configuration</a></summary>
+<pre>
+listeners=SASL_SSL://kafka.confluent.local:9093
+advertised.listeners=SASL_SSL://kafka.confluent.local:9093
+security.inter.broker.protocol=SASL_SSL
+sasl.mechanism.inter.broker.protocol=OAUTHBEARER
+sasl.enabled.mechanisms=OAUTHBEARER
+listener.name.sasl_ssl.oauthbearer.sasl.server.callback.handler.class=io.confluent.examples.authentication.oauth.OauthBearerValidatorCallbackHandler
+listener.name.sasl_ssl.oauthbearer.sasl.login.callback.handler.class=io.confluent.examples.authentication.oauth.OauthBearerLoginCallbackHandler
+ssl.truststore.location=/etc/kafka/kafka.server.truststore.jks
+ssl.truststore.password=secret
+ssl.keystore.location=/etc/kafka/kafka.server.keystore.jks
+ssl.keystore.password=secret
+ssl.key.password=secret
+</pre>
+</details>
+
+Kafka brokers need a keystore to store its private certificate as well as a truststore to verify the identity of other brokers. 
+
+### Further information
+
+* [Confluent documentation on Oauth authentication](https://docs.confluent.io/current/kafka/authentication_sasl/authentication_sasl_oauth.html)
+* [Blog Post](https://medium.com/@jairsjunior/how-to-setup-oauth2-mechanism-to-a-kafka-broker-e42e72839fe)
