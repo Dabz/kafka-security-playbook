@@ -1,0 +1,9 @@
+dn: cn=Kafka Developers,ou=groups,{{ LDAP_BASE_DN }}
+changetype: modify
+add: memberuid
+memberuid: alice
+
+dn: cn=Kafka Developers,ou=groups,{{ LDAP_BASE_DN }}
+changetype: modify
+add: memberuid
+memberuid: barnie

@@ -1,0 +1,15 @@
+dn: uid=alice,ou=users,{{ LDAP_BASE_DN }}
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: alice
+sn: LookingGlass
+givenName: Alice
+cn: alice
+displayName: Alice LookingGlass
+uidNumber: 10000
+gidNumber: 5000
+userPassword: absolutelyalice
+gecos: alice
+loginShell: /bin/bash
+homeDirectory: /home/alice

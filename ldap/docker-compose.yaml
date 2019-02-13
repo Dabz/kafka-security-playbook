@@ -1,0 +1,15 @@
+version: '3'
+services:
+    ldap:
+        image: osixia/openldap:1.2.3
+        hostname: ldap
+        container_name: ldap
+        environment:
+            LDAP_ORGANISATION: "Confluent"
+            LDAP_DOMAIN: "confluent.io"
+        ports:
+            - "389:389"
+            - "636:636"
+        volumes:
+            - "$PWD/custom:/container/service/slapd/assets/config/bootstrap/ldif/custom"
+        command: "--copy-service"
