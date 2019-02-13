@@ -5,12 +5,6 @@ services:
     build: zookeeper/
     container_name: zookeeper
     hostname: zookeeper
-<<<<<<< HEAD
-    # restart: on-failure
-    #    environment:
-    #  - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf 
-=======
->>>>>>> Dabz-master
 
   kafka:
     build: kafka/
