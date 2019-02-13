@@ -9,7 +9,7 @@ cn: barnie
 displayName: Barnie Rubble
 uidNumber: 10001
 gidNumber: 5000
-userPassword: trouble
+userPassword: barnie-secret
 gecos: barnie
 loginShell: /bin/bash
 homeDirectory: /home/barnie

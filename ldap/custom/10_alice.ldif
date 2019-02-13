@@ -9,7 +9,7 @@ cn: alice
 displayName: Alice LookingGlass
 uidNumber: 10000
 gidNumber: 5000
-userPassword: absolutelyalice
+userPassword: alice-secret
 gecos: alice
 loginShell: /bin/bash
 homeDirectory: /home/alice

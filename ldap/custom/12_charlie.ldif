@@ -9,7 +9,7 @@ cn: charlie
 displayName: Charlie Sheen
 uidNumber: 10001
 gidNumber: 5000
-userPassword: hunky
+userPassword: charlie-secret
 gecos: charlie
 loginShell: /bin/bash
 homeDirectory: /home/charlie

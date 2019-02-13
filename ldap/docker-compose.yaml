@@ -13,3 +13,23 @@ services:
         volumes:
             - "$PWD/custom:/container/service/slapd/assets/config/bootstrap/ldif/custom"
         command: "--copy-service"
+
+    zookeeper:
+        build: zookeeper/
+        hostname: zookeeper
+        container_name: zookeeper
+        environment:
+          - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf
+        ports:
+            - "2181:2181"
+
+    kafka:
+        build: kafka/
+        container_name: kafka
+        environment:
+            - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf 
+        depends_on: 
+            - zookeeper
+            - ldap
+        ports:
+            - "9093:9093"
