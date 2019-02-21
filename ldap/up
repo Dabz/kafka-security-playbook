@@ -20,5 +20,5 @@ echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:90
 echo "Should fail (charlie is NOT in group)"
 echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --topic test-topic --producer.config=/etc/kafka/charlie.properties"
 echo "Should succeed (alice is in group)"
-echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config /etc/kafka/consumer.properties --topic test --from-beginning"
+echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config /etc/kafka/alice.properties --topic test-topic --from-beginning"
 
