@@ -12,7 +12,6 @@ RUN yum install -y java-1.8.0-openjdk
 RUN yum install -y confluent-kafka-2.11
 RUN yum install -y confluent-security
 
-COPY ldap-plugins-5.1.1.jar /usr/share/java/kafka/ldap-plugins-5.1.1.jar
 # 3. Configure Kafka and zookeeper for Kerberos 
 COPY server.properties /etc/kafka/server.properties
 COPY kafka.jaas.config /etc/kafka/kafka_server_jaas.conf
