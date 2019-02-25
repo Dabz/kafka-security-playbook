@@ -20,8 +20,6 @@ services:
         container_name: zookeeper
         environment:
           - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf
-        ports:
-            - "2181:2181"
 
     kafka:
         build: kafka/
