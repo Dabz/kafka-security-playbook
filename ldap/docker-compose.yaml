@@ -1,0 +1,33 @@
+version: '3'
+services:
+    ldap:
+        image: osixia/openldap:1.2.3
+        hostname: ldap
+        container_name: ldap
+        environment:
+            LDAP_ORGANISATION: "Confluent"
+            LDAP_DOMAIN: "confluent.io"
+        ports:
+            - "389:389"
+            - "636:636"
+        volumes:
+            - "$PWD/custom:/container/service/slapd/assets/config/bootstrap/ldif/custom"
+        command: "--copy-service"
+
+    zookeeper:
+        build: zookeeper/
+        hostname: zookeeper
+        container_name: zookeeper
+        environment:
+          - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf
+
+    kafka:
+        build: kafka/
+        container_name: kafka
+        environment:
+            - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf 
+        depends_on: 
+            - zookeeper
+            - ldap
+        ports:
+            - "9093:9093"

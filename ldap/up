@@ -1,0 +1,24 @@
+#!/bin/sh
+
+docker-compose up -d --build
+
+# Creating the users 
+# kafka is configured as a super user
+docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=kafka],SCRAM-SHA-512=[password=kafka]' --entity-type users --entity-name kafka
+docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=alice-secret],SCRAM-SHA-512=[password=alice-secret]' --entity-type users --entity-name alice
+docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=barnie-secret],SCRAM-SHA-512=[password=barnie-secret]' --entity-type users --entity-name barnie
+docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=charlie-secret],SCRAM-SHA-512=[password=charlie-secret]' --entity-type users --entity-name charlie
+
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --cluster --operation=All --allow-principal=User:kafka
+docker-compose exec kafka kafka-topics --create --topic test-topic --zookeeper zookeeper:2181 --partitions 10 --replication-factor 1
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --topic=test-topic --producer '--allow-principal=Group:Kafka Developers'
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --topic=test-topic --consumer --group '*' '--allow-principal=Group:Kafka Developers'
+
+echo "Example configuration:"
+echo "Should succeed (barnie is in group)"
+echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --topic test-topic --producer.config=/etc/kafka/barnie.properties"
+echo "Should fail (charlie is NOT in group)"
+echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --topic test-topic --producer.config=/etc/kafka/charlie.properties"
+echo "Should succeed (alice is in group)"
+echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config /etc/kafka/alice.properties --topic test-topic --from-beginning"
+
