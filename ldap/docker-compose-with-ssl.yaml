@@ -7,11 +7,17 @@ services:
         environment:
             LDAP_ORGANISATION: "Confluent"
             LDAP_DOMAIN: "confluent.io"
+            LDAP_TLS: "true"
+            LDAP_TLS_CRT_FILENAME: my-ldap.crt
+            LDAP_TLS_KEY_FILENAME: my-ldap.key
+            LDAP_TLS_CA_CRT_FILENAME: my-ca.crt
+            LDAP_TLS_VERIFY_CLIENT: demand
         ports:
             - "389:389"
             - "636:636"
         volumes:
             - "$PWD/ldap/custom:/container/service/slapd/assets/config/bootstrap/ldif/custom"
+            - "$PWD/ldap/certs:/container/service/slapd/assets/certs"
         command: "--copy-service"
 
     zookeeper:
@@ -33,4 +39,4 @@ services:
             - "$PWD/kafka/jks:/etc/kafka/jks"
         ports:
             - "9093:9093"
-        command: ["kafka-server-start", "/etc/kafka/server.properties"]
+        command: ["kafka-server-start", "/etc/kafka/server-with-ssl.properties"]
