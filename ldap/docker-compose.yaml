@@ -14,6 +14,16 @@ services:
             - "$PWD/ldap/custom:/container/service/slapd/assets/config/bootstrap/ldif/custom"
         command: "--copy-service"
 
+    phpldapadmin-service:
+        image: osixia/phpldapadmin:0.7.2
+        container_name: ldapadmin-service
+        environment:
+          - PHPLDAPADMIN_LDAP_HOSTS=ldap
+        ports:
+          - "6443:443"
+        depends_on:
+          - ldap
+
     zookeeper:
         build: zookeeper/
         hostname: zookeeper
@@ -30,6 +40,7 @@ services:
             - zookeeper
             - ldap
         volumes:
+            - "$PWD/kafka/users:/service/kafka/users"
             - "$PWD/kafka/jks:/etc/kafka/jks"
         ports:
             - "9093:9093"
