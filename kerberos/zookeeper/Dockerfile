@@ -3,7 +3,7 @@ MAINTAINER d.gasparina@gmail.com
 ENV container docker
 
 # 1. Adding Confluent repository
-RUN rpm --import https://packages.confluent.io/rpm/4.1/archive.key
+RUN rpm --import https://packages.confluent.io/rpm/5.1/archive.key
 COPY confluent.repo /etc/yum.repos.d/confluent.repo
 RUN yum clean all
 
