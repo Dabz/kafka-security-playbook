@@ -32,6 +32,12 @@ services:
             KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SASL_PLAINTEXT
             ZOOKEEPER_SASL_ENABLED: "FALSE"
 
+        healthcheck:
+            test: ["CMD", "env", "-u", "KAFKA_OPTS", "cub", "kafka-ready", "-b", "kafka:9092", "-c", "/etc/kafka/secrets/admin.properties", "1", "30"]
+            interval: 1s
+            timeout: 3s
+            retries: 30
+
         volumes:
             - $PWD/JMX_Exporter/jmx_prometheus_javaagent-0.11.0.jar:/tmp/jmx_prometheus_javaagent-0.11.0.jar
             - $PWD/JMX_Exporter/kafka_config.yml:/tmp/config.yml
@@ -59,4 +65,13 @@ services:
             - $PWD/Grafana/provisioning:/etc/grafana/provisioning
         ports:
             - "3000:3000"
+
+    client:
+        build: Client/
+        container_name: client
+        depends_on:
+            - kafka
+
+        volumes:
+            - $PWD/secrets:/etc/kafka/secrets
 

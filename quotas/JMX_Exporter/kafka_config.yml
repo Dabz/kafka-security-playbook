@@ -21,7 +21,9 @@ rules:
     name: "cp_kafka_controller_controllerstats_$1"
   - pattern : kafka.server<type=SessionExpireListener, name=(.+)><>OneMinuteRate
     name: "cp_kafka_server_sessionexpirelistener_$1"
-  - pattern : kafka.server<type=Produce,user=([-.\w]+),client-id=([-.\w]+)><>(\w+)
+  - pattern : kafka.server<type=Produce,(?:user=([-.\w]+))?(?:,)?(?:client-id=([-.\w]+))?><>(\w+)
     name: "cp_kafka_server_throttle_produce_$1_$2_$3"
-  - pattern : kafka.server<type=Fetch,user=([-.\w]+),client-id=([-.\w]+)><>(\w+)
+  - pattern : kafka.server<type=Fetch,(?:user=([-.\w]+))?(?:,)?(?:client-id=([-.\w]+))?><>(\w+)
     name: "cp_kafka_server_throttle_fetch_$1_$2_$3"
+  - pattern : kafka.server<type=Request,(?:user=([-.\w]+))?(?:,)?(?:client-id=([-.\w]+))?><>(\w+)
+    name: "cp_kafka_server_throttle_request_$1_$2_$3"
