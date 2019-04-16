@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+# Starting docker-compose services
+docker-compose up -d --build
+
+echo "Example configuration to access kafka:"
+echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka.confluent.local:9093 --topic test --producer.config /etc/kafka/consumer.properties"
+echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka.confluent.local:9093 --topic test --consumer.config /etc/kafka/consumer.properties --from-beginning"
