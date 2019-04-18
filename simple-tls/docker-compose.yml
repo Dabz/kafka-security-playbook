@@ -6,8 +6,6 @@ services:
     hostname: zookeeper
     domainname: confluent.local
     restart: on-failure
-    volumes:
-      - ./certs/:/var/lib/secret
     networks:
       default:
         aliases:
@@ -22,6 +20,8 @@ services:
     depends_on:
       - zookeeper
     restart: on-failure
+    #environment:
+    #  - KAFKA_OPTS=-Djavax.net.debug=all
     volumes:
       - ./certs/:/var/lib/secret
     networks:
@@ -30,6 +30,15 @@ services:
           - kafka.confluent.local
     ports:
       - "9093:9093"
+
+  apache:
+    image: 'httpd:2.4'
+    container_name: httpd
+    hostname: httpd
+    ports:
+      - "80:80"
+    volumes:
+      - ./web:/usr/local/apache2/htdocs/
 
 volumes:
   secret: {}
