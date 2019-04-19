@@ -20,8 +20,9 @@ services:
     depends_on:
       - zookeeper
     restart: on-failure
-    #environment:
-    #  - KAFKA_OPTS=-Djavax.net.debug=all
+    environment:
+       - KAFKA_OPTS=-Dcom.sun.security.enableCRLDP=true -Dcom.sun.net.ssl.checkRevocation=true
+    #  - KAFKA_OPTS=-Djavax.net.debug=all -Djava.security.debug=all
     volumes:
       - ./certs/:/var/lib/secret
     networks:
