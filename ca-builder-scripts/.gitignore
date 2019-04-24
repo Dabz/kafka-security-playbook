@@ -1,0 +1,7 @@
+tmp-certs/
+stores
+legacy/
+
+## remove from git the generated CA files
+
+ca/
