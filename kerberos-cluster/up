@@ -1,0 +1,93 @@
+#!/bin/sh
+
+# Starting kerberos,
+# Avoiding starting up all services at the begining to generate the keytab first
+
+docker-compose up -d kdc
+
+# Create server keys
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zookeeper/zookeeper.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/kafka.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
+
+### Create the required identities:
+# Kafka service principals:
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/kafka1.kerberos_default@TEST.CONFLUENT.IO" > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/kafka2.kerberos_default@TEST.CONFLUENT.IO" > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/kafka3.kerberos_default@TEST.CONFLUENT.IO" > /dev/null
+
+# Zookeeper service principals;
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zookeeper/zookeeper1.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zookeeper/zookeeper2.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zookeeper/zookeeper3.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
+
+# Create a principal with which to connect to Zookeeper from brokers - NB you must use the same credential on all brokers!
+# (If you use ZK acls....)
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zkclient@TEST.CONFLUENT.IO"  > /dev/null
+
+# Create an admin principal for the cluster, which we'll use to setup ACLs.
+# Look after this - its also declared a super user in broker config.
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey admin/for-kafka@TEST.CONFLUENT.IO"  > /dev/null
+
+# Create principals to connect in to the cluster:
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka_producer@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka_producer/instance_demo@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka_consumer@TEST.CONFLUENT.IO"  > /dev/null
+
+
+# Now create keytabs needed:
+docker exec -ti kdc rm -f /var/lib/secret/kafka1.key 2>&1 > /dev/null
+docker exec -ti kdc rm -f /var/lib/secret/kafka2.key 2>&1 > /dev/null
+docker exec -ti kdc rm -f /var/lib/secret/kafka3.key 2>&1 > /dev/null
+docker exec -ti kdc rm -f /var/lib/secret/zookeeper1.key 2>&1 > /dev/null
+docker exec -ti kdc rm -f /var/lib/secret/zookeeper2.key 2>&1 > /dev/null
+docker exec -ti kdc rm -f /var/lib/secret/zookeeper3.key 2>&1 > /dev/null
+docker exec -ti kdc rm -f /var/lib/secret/zookeeper-client.key 2>&1 > /dev/null
+docker exec -ti kdc rm -f /var/lib/secret/kafka-client.key 2>&1 > /dev/null
+docker exec -ti kdc rm -f /var/lib/secret/kafka-admin.key 2>&1 > /dev/null
+
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka1.key -norandkey kafka/kafka1.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka2.key -norandkey kafka/kafka2.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka3.key -norandkey kafka/kafka3.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper1.key -norandkey zookeeper/zookeeper1.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper2.key -norandkey zookeeper/zookeeper2.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper3.key -norandkey zookeeper/zookeeper3.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper-client.key -norandkey zkclient@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka-client.key -norandkey kafka_producer@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka-client.key -norandkey kafka_producer/instance_demo@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka-client.key -norandkey kafka_consumer@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka-admin.key -norandkey admin/for-kafka@TEST.CONFLUENT.IO " > /dev/null
+
+#docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka1.key -glob zookeeper/*" > /dev/null
+#docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka.key -glob zookeeper/*" > /dev/null
+
+
+
+
+#
+# # Create the keytab to use for Kafka
+# docker exec -ti kdc rm -f /var/lib/secret/kafka.key 2>&1 > /dev/null
+# docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka.key -glob zookeeper/*" > /dev/null
+# docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka.key -glob kafka*" > /dev/null
+#
+# Starting zookeeper and kafka now that the keytab has been created with the required credentials and services
+docker-compose up -d
+#
+# # Adding ACLs for consumer and producer user
+# TODO: ------------
+
+docker-compose exec client bash -c "kinit -k -t /var/lib/secret/kafka-admin.key admin/for-kafka && kafka-acls --bootstrap-server kafka1:9093 --command-config /etc/kafka/command.properties --add --allow-principal User:kafka_producer --producer --topic=*"
+docker-compose exec client bash -c "kinit -k -t /var/lib/secret/kafka-admin.key admin/for-kafka && kafka-acls --bootstrap-server kafka1:9093 --command-config /etc/kafka/command.properties --add --allow-principal User:kafka_consumer --consumer --topic=* --group=*"
+
+
+
+
+# docker-compose exec kafka bash -c "kinit -k -t /var/lib/secret/kafka.key kafka/admin && kafka-acls  --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:kafka_producer --producer --topic=*"
+
+# docker-compose exec kafka bash -c "kinit -k -t /var/lib/secret/kafka.key kafka/admin && kafka-acls  --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:kafka_producer --producer --topic=*"
+# docker-compose exec kafka bash -c "kinit -k -t /var/lib/secret/kafka.key kafka/admin && kafka-acls  --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:kafka_consumer --consumer --topic=* --group=*"
+#
+echo "Example configuration to access kafka:"
+echo "-> docker-compose exec client bash -c 'kinit -k -t /var/lib/secret/kafka-client.key kafka_producer && kafka-console-producer --broker-list kafka1:9093 --topic test --producer.config /etc/kafka/producer.properties'"
+echo "-> docker-compose exec client bash -c 'kinit -k -t /var/lib/secret/kafka-client.key kafka_consumer && kafka-console-consumer --bootstrap-server kafka1:9093 --topic test --consumer.config /etc/kafka/consumer.properties --from-beginning'"
