@@ -14,17 +14,19 @@ echo "Building a part of certificates for $HOSTNAME using $EXTENSION"
 cd ca;
 
 # create a private key
-openssl genrsa -aes256 -out intermediate/private/$HOSTNAME.key.pem 2048
+openssl genrsa -aes256 -passout pass:confluent  -out intermediate/private/$HOSTNAME.key.pem 2048
 chmod 400 intermediate/private/$HOSTNAME.key.pem
 
 # create a csr
 openssl req -config intermediate/openssl.cnf \
+      -passin pass:confluent -passout pass:confluent \
       -key intermediate/private/$HOSTNAME.key.pem \
       -new -sha256 -out intermediate/csr/$HOSTNAME.csr.pem
 
 # create the cert
 openssl ca -config intermediate/openssl.cnf -extensions $EXTENSION -days 375 -notext -md sha256 \
            -in intermediate/csr/$HOSTNAME.csr.pem \
+           -passin pass:confluent \
            -out intermediate/certs/$HOSTNAME.cert.pem
 
 chmod 444 intermediate/certs/$HOSTNAME.cert.pem
