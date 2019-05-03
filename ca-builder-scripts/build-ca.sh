@@ -9,7 +9,7 @@ touch index.txt
 echo 1000 > serial
 
 
-openssl genrsa -aes256 -out private/ca.key.pem 4096
+openssl genrsa -aes256 -passout pass:confluent -out private/ca.key.pem 4096
 chmod 400 private/ca.key.pem
 
 cp ../configs/ca.config openssl.cnf
@@ -17,6 +17,7 @@ cp ../configs/ca.config openssl.cnf
 openssl req -config openssl.cnf \
      -key private/ca.key.pem \
      -new -x509 -days 7300 -sha256 -extensions v3_ca \
+      -passin pass:confluent -passout pass:confluent \
      -out certs/ca.cert.pem
 
  chmod 444 certs/ca.cert.pem
