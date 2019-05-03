@@ -40,7 +40,7 @@ the first is for CRL, while the second is for OCSP.
 
 This can be provided by for example:
 
-* The scripts available in the [../ca-builder-scripts/](../ca-builder-scripts/), refer to their README for details.
+* The scripts available in the [ca-builder-scripts/](../../ca-builder-scripts/), refer to their README for details.
 * You can as well use the https://www.vaultproject.io, to build a custom CA.
 
 Then you should make this certs available as java key stores to the brokers and clients here, and keep an updated list of revoked certs inside the [web/](web/) directory to be served and available for your clients.
