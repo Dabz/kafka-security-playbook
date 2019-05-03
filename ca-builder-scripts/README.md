@@ -21,7 +21,7 @@ A collection of scripts are provided to generate any of the required steps to bu
 To construct the root CA setup, you can run the script:
 
 ```bash
-./build-ca.sh
+./utils/build-ca.sh
 ```
 
 this script will generate the default directory structure for the CA, including the root certificate for your authority. After the execution you should see a directory structure like this:
@@ -48,7 +48,7 @@ drwx------   3 pere  staff    96  3 May 16:32 private
 Once the main CA structure is created, you need to create the intermediate CA, for this you can use this script:
 
 ```bash
-./build-intermediate-ca.sh
+./utils/build-intermediate-ca.sh
 ```
 
 Once the script is run, you should see a directory structure like this:
