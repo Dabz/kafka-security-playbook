@@ -44,3 +44,7 @@ This can be provided by for example:
 * You can as well use the https://www.vaultproject.io, to build a custom CA.
 
 Then you should make this certs available as java key stores to the brokers and clients here, and keep an updated list of revoked certs inside the [web/](web/) directory to be served and available for your clients.
+
+## Running this playbook
+
+This directory contains working keystores for the broker and the clients, as well a revoked certs list, that can be used to see how this flow works.
