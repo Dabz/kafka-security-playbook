@@ -11,7 +11,12 @@ EXTENSION=$2
 
 echo "Building a part of certificates for $HOSTNAME using $EXTENSION"
 
-cd ca;
+if [ -z "${CA_ROOT_DIR+x}" ];
+then
+CA_ROOT_DIR='.'
+fi
+
+cd $CA_ROOT_DIR/ca;
 
 # create a private key
 openssl genrsa -aes256 -passout pass:confluent  -out intermediate/private/$HOSTNAME.key.pem 2048
