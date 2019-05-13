@@ -47,7 +47,7 @@ services:
     volumes:
       - secret:/var/lib/secret
       - ./kdc/krb5.conf:/etc/krb5.conf
-    #command: "sleep infinity"
+    command: "sleep infinity"
 
   client:
     build: client/
