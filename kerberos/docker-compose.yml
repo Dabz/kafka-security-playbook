@@ -19,7 +19,7 @@ services:
     # Required to wait for the keytab to get generated
     restart: on-failure
     environment:
-      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf 
+      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf -Dsun.security.krb5.debug=true
     volumes:
       - secret:/var/lib/secret
       - ./kdc/krb5.conf:/etc/krb5.conf
