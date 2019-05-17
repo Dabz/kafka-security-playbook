@@ -19,7 +19,8 @@ services:
     # Required to wait for the keytab to get generated
     restart: on-failure
     environment:
-      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf -Dsun.security.krb5.debug=true
+        # - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf -Dsun.security.krb5.debug=true
+      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf
     volumes:
       - secret:/var/lib/secret
       - ./kdc/krb5.conf:/etc/krb5.conf
@@ -30,7 +31,8 @@ services:
     hostname: kafka
     domainname: kerberos_default
     environment:
-      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf 
+        # - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dsun.security.krb5.debug=true -Dzookeeper.sasl.client.username=zookeeper1
+      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dzookeeper.sasl.client.username=zookeeper1
     depends_on: 
       - zookeeper
       - kdc
