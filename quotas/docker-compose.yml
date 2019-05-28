@@ -13,8 +13,6 @@ services:
         volumes:
             - $PWD/JMX_Exporter/jmx_prometheus_javaagent-0.11.0.jar:/tmp/jmx_prometheus_javaagent-0.11.0.jar
             - $PWD/JMX_Exporter/zookeeper_config.yml:/tmp/config.yml
-        ports:
-            - "2181:2181"
     kafka:
         image: confluentinc/cp-kafka:5.2.1
         hostname: kafka
@@ -42,8 +40,6 @@ services:
             - $PWD/JMX_Exporter/jmx_prometheus_javaagent-0.11.0.jar:/tmp/jmx_prometheus_javaagent-0.11.0.jar
             - $PWD/JMX_Exporter/kafka_config.yml:/tmp/config.yml
             - $PWD/secrets:/etc/kafka/secrets
-        ports:
-           - "9092:9092"
 
     prometheus:
         image: prom/prometheus
@@ -53,8 +49,6 @@ services:
             - zookeeper
         volumes:
             - $PWD/Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-        ports:
-            - "9090:9090"
     
     grafana:
         image: grafana/grafana
