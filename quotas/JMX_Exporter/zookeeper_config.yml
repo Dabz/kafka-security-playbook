@@ -1,0 +1,7 @@
+---
+ssl: false
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+rules:
+- pattern: "org.apache.ZooKeeperService<name0=StandaloneServer_port(\\d+)><>(\\w+)"
+  name: "cp_zookeeper_$2"

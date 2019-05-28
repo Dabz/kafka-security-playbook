@@ -1,0 +1,71 @@
+---
+version: '3'
+services:
+    zookeeper:
+        image: confluentinc/cp-zookeeper:5.2.1
+        hostname: zookeeper
+        container_name: zookeeper
+        environment:
+            ZOOKEEPER_SERVER_ID: 1
+            ZOOKEEPER_CLIENT_PORT: "2181"
+            ZOOKEEPER_TICK_TIME: "2000"
+            KAFKA_OPTS: -javaagent:/tmp/jmx_prometheus_javaagent-0.11.0.jar=5556:/tmp/config.yml
+        volumes:
+            - $PWD/JMX_Exporter/jmx_prometheus_javaagent-0.11.0.jar:/tmp/jmx_prometheus_javaagent-0.11.0.jar
+            - $PWD/JMX_Exporter/zookeeper_config.yml:/tmp/config.yml
+    kafka:
+        image: confluentinc/cp-kafka:5.2.1
+        hostname: kafka
+        container_name: kafka
+        depends_on:
+            - zookeeper
+        environment:
+            KAFKA_BROKER_ID: 1
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+            KAFKA_LISTENERS: SASL_PLAINTEXT://kafka:9092
+            KAFKA_ADVERTISED_LISTENERS: SASL_PLAINTEXT://kafka:9092
+            KAFKA_OPTS: -javaagent:/tmp/jmx_prometheus_javaagent-0.11.0.jar=5556:/tmp/config.yml -Djava.security.auth.login.config=/etc/kafka/secrets/kafka_server_jaas.conf
+            KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
+            KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+            KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SASL_PLAINTEXT
+            ZOOKEEPER_SASL_ENABLED: "FALSE"
+
+        healthcheck:
+            test: ["CMD", "env", "-u", "KAFKA_OPTS", "cub", "kafka-ready", "-b", "kafka:9092", "-c", "/etc/kafka/secrets/admin.properties", "1", "30"]
+            interval: 1s
+            timeout: 3s
+            retries: 30
+
+        volumes:
+            - $PWD/JMX_Exporter/jmx_prometheus_javaagent-0.11.0.jar:/tmp/jmx_prometheus_javaagent-0.11.0.jar
+            - $PWD/JMX_Exporter/kafka_config.yml:/tmp/config.yml
+            - $PWD/secrets:/etc/kafka/secrets
+
+    prometheus:
+        image: prom/prometheus
+        container_name: prometheus
+        depends_on:
+            - kafka
+            - zookeeper
+        volumes:
+            - $PWD/Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    
+    grafana:
+        image: grafana/grafana
+        container_name: grafana
+        depends_on:
+            - prometheus
+        volumes:
+            - $PWD/Grafana/provisioning:/etc/grafana/provisioning
+        ports:
+            - "3000:3000"
+
+    client:
+        build: Client/
+        container_name: client
+        depends_on:
+            - kafka
+
+        volumes:
+            - $PWD/secrets:/etc/kafka/secrets
+

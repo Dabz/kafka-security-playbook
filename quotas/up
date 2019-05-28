@@ -1,0 +1,29 @@
+#!/bin/bash
+#
+# Up script for testing quotas
+#
+
+# Start up cluster
+docker-compose up -d
+
+# Wait for Kafka Broker to be up
+
+docker-compose exec kafka env -u KAFKA_OPTS cub kafka-ready -b kafka:9092 -c /etc/kafka/secrets/admin.properties 1 30
+
+# Set up topics
+docker-compose exec client kafka-topics --create --zookeeper zookeeper:2181 --topic quota-topic --partitions 1 --replication-factor 1
+
+# Set up quotas
+docker-compose exec client kafka-configs  --zookeeper zookeeper:2181 --alter --add-config 'producer_byte_rate=10240,consumer_byte_rate=20480' --entity-type users --entity-name quota
+
+# Suggest Grafana URL for monitoring
+echo "Open http://localhost:3000 to see the Grafana dashboard"
+
+# Show example on how to test quotas
+echo "Example configuration without quota to access kafka:"
+
+echo "-> docker-compose exec client kafka-producer-perf-test --num-records 100000 --throughput 100000 --producer-props bootstrap.servers=kafka:9092 --record-size 100 --topic quota-topic --producer.config /etc/kafka/secrets/noquota.properties"
+
+echo "Example configuration with quota to access kafka:"
+
+echo "-> docker-compose exec client kafka-producer-perf-test --num-records 100000 --throughput 100000 --producer-props bootstrap.servers=kafka:9092 --record-size 100 --topic quota-topic --producer.config /etc/kafka/secrets/quota.properties"
