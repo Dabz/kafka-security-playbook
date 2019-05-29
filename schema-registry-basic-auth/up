@@ -1,0 +1,15 @@
+#!/bin/bash
+
+docker-compose up -d
+# TODO: An ugly sleep to remove with the confluent utility belt at some point
+sleep 5
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p read -o SUBJECT_READ
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p write -o SUBJECT_WRITE
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p admin -o '*'
+
+echo "Schema Registry is listening on http://localhost:8089"
+echo "-> user:password  |  description"
+echo "-> _____________"
+echo "-> read:read    |  Global read access"
+echo "-> write:write  |  Global write access"
+echo "-> admin:admin  |  Global admin access"
