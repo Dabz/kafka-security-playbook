@@ -3,6 +3,7 @@
 # Starting kerberos,
 # Avoiding starting up all services at the begining to generate the keytab first 
 
+docker-compose build
 docker-compose up -d kdc
 
 # Create the required credential 
@@ -12,12 +13,12 @@ docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka_co
 docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/admin@TEST.CONFLUENT.IO"  > /dev/null
 
 # Create server keys 
-docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zookeeper/zookeeper.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zookeeper1/zookeeper.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
 docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/kafka.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
 
 # Create the keytab to use for Kafka
 docker exec -ti kdc rm -f /var/lib/secret/kafka.key 2>&1 > /dev/null
-docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka.key -glob zookeeper/*" > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka.key -glob zookeeper1/*" > /dev/null
 docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka.key -glob kafka*" > /dev/null
 
 # Starting zookeeper and kafka now that the keytab has been created with the required credentials and services
