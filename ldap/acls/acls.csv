@@ -1,0 +1,7 @@
+KafkaPrincipal,ResourceType,PatternType,ResourceName,Operation,PermissionType,Host
+User:kafka,Cluster,LITERAL,kafka-cluster,All,Allow,*
+Group:Kafka Developers,Group,LITERAL,*,Read,Allow,*
+Group:Kafka Developers,Topic,LITERAL,test-topic,Describe,Allow,*
+Group:Kafka Developers,Topic,LITERAL,test-topic,Read,Allow,*
+Group:Kafka Developers,Topic,LITERAL,test-topic,Write,Allow,*
+Group:Kafka Developers,Topic,LITERAL,test-topic,Create,Allow,*

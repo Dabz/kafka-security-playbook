@@ -44,8 +44,8 @@ if [ $ssl -eq 1 ]; then
     DOCKER_COMPOSE_FILE="$PWD/docker-compose-with-ssl.yaml"
 fi
 
-## start docker-compose
-docker-compose -f $DOCKER_COMPOSE_FILE up -d --build
+## start docker-compose up to and including kafka
+docker-compose -f $DOCKER_COMPOSE_FILE up -d --build kafka
 
 # Creating the users
 # kafka is configured as a super user
@@ -54,10 +54,7 @@ docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add
 docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=barnie-secret],SCRAM-SHA-512=[password=barnie-secret]' --entity-type users --entity-name barnie
 docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=charlie-secret],SCRAM-SHA-512=[password=charlie-secret]' --entity-type users --entity-name charlie
 
-docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --cluster --operation=All --allow-principal=User:kafka
-docker-compose exec kafka kafka-topics --create --topic test-topic --zookeeper zookeeper:2181 --partitions 10 --replication-factor 1
-docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --topic=test-topic --producer '--allow-principal=Group:Kafka Developers'
-docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --topic=test-topic --consumer --group '*' '--allow-principal=Group:Kafka Developers'
+docker-compose up -d
 
 echo "Example configuration:"
 echo "Should succeed (barnie is in group)"
