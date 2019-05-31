@@ -55,11 +55,13 @@ As the Service ticket is signed with the Service principal's key, the Service ca
 Based on the above, each connection in the cluster must be established with the following in place:
 
 * On the Kerberos Client:
-** A client principal and key to authenticate with the KDC, `{client name}@REALM`
-** a configured name for the service to connect to, `{service name}`
-** the network address for the service, `{network address}`.
+    * A client principal and key to authenticate with the KDC, `{client name}@REALM`
+    * a configured name for the service to connect to, `{service name}`
+    * the network address for the service, `{network address}`.
+    * This is the *User Principal Name*.
 * On the server:
-** a principal name & key in the form `{service name}/{network address}@REALM`.
+  * a principal name & key in the form `{service name}/{network address}@REALM`.
+  * This is the *Service Principal Name*.
 
 As can be seen, the service principal must be constructed correctly to work.
 However, the `{client name}` format is not mandated in the same way and is not bound to a network address.
@@ -67,7 +69,6 @@ Often the client name is a simple alphanumeric username, let's say 'john'.
 However, you may sometimes see a client principal such as 'john/admin'.
 In this form, 'admin' is called an _instance_ of the 'john' principal and can be used by 'john' to run services on the system with different credentials and privileges from the main account.
 From the Kerberos perspective, the two principals are completely separate, but it can nonetheless be convenient to use this naming convention.
-
 
 # Technical Components
 ## KDC
@@ -120,8 +121,8 @@ https://docs.oracle.com/javase/8/docs/jre/api/security/jaas/spec/com/sun/securit
 
 A Kerberos enabled Client or Service can be initiated in two ways:
 
-. Use kinit to cache a TGT locally, and then launch the process with this shared cache.
-. Configure a keytab to be used directly.
+1. Use kinit to cache a TGT locally, and then launch the process with this shared cache.
+2. Configure a keytab to be used directly.
 
 Configuration of the former is straight-forward as follows:
 
@@ -152,7 +153,7 @@ For Kafka, the names are defined in the application code as we will describe lat
 
 # Kerberizing Kafka
 
-To fully understand the steps required to Kerberize Kafka, we should understand each Client -> Service connection which we wish to Configure.
+To fully understand the steps required to Kerberize Kafka, we should understand each Client &rarr; Service connection which we wish to Configure.
 Each of these connections has a prototypical set of configurations required on the Client side and on the Service side.
 
 The following are values you must decide upon at the cluster level:
@@ -163,7 +164,7 @@ Typically `kafka` or `cp-kafka`.
 By default this is `zookeeper`.
 * `{security-protocol}` - either `SASL_PLAINTEXT` of `SASL_SSL` if using in conjunction with TLS.
 
-## Service Configuration
+## Service Configurations
 
 In the cluster there are two Kerberized services running: Kafka Broker and Zookeeper.
 We will configure these first and then the clients.
@@ -176,6 +177,8 @@ We will configure these first and then the clients.
     * Ensure that the principal is a correctly formed service principal for each node: `{kafka-kerberos-service-name}/{FQDN}@{realm}`.    
 * Broker Server Properties:
     * `sasl.enabled.mechanisms=GSSAPI` (more SASL mechanisms may be specified in a comma-separated list)
+    * `sasl.jaas.config` - jaas override *** TODO - verify this!
+    * `{listener_name}.{sasl_mechanism}.sasl.jaas.config` - jaas override on a per-listener basis.
 
 ### Zookeeper Service
 
@@ -195,14 +198,16 @@ We will configure these first and then the clients.
 * Zookeeper Properties:
     * TODO
 
-## Client -> Kafka Service
+## Client Configurations
+
+### Client &rarr; Kafka Service
 Clients connecting in to Kafka may be any of:
 
 * A Kafka producer
 * A Kafka consumer
 * A Kafka Admin client
 
-Note that many applications are a combination of many of these - notably Streams applications.
+Note that many applications are a combination of many of these - notably Streams applications and Kafka Connect.
 
 * Client JAAS:
     * Login Context: `KafkaClient`
@@ -210,9 +215,10 @@ Note that many applications are a combination of many of these - notably Streams
 * Client Properties:
     * `sasl.kerberos.service.name={kafka-kerberos-service-name}`
     * `security.protocol={security-protocol}`
+    * `sasl.jaas.config` - jaas override.
 
 
-## Kafka Broker -> Zookeeper Service
+### Kafka Broker &rarr; Zookeeper Service
 Brokers connect to Zookeeper for cluster operations.
 
 * Broker JAAS:
@@ -224,7 +230,7 @@ Brokers connect to Zookeeper for cluster operations.
     * `-Dzookeeper.sasl.client.username={zookeeper-kerberos-service-name}` (OPTIONAL)
 
 
-## Kafka Broker -> Kafka Service
+### Kafka Broker &rarr; Kafka Service
 Each Kafka broker connects to other brokers in the cluster, primarily for replication, but also for cluster management operations.
 
 * JAAS:
@@ -233,32 +239,35 @@ Each Kafka broker connects to other brokers in the cluster, primarily for replic
     * `sasl.kerberos.service.name={kafka-kerberos-service-name}`
 
 
-## Client -> Zookeeper (Optional)
+### Client &rarr; Zookeeper (Optional)
 Historically, clients needed to connect directly to ZooKeeper for service discovery and admin operations.
-However, the new Kafka Admin API allows all this functionality via Client -> Kafka Broker connection, so this direct connection should not be required.
+However, the new Kafka Admin API allows all this functionality via Client &rarr; Kafka Broker connection, so this direct connection should not be required.
 
 * JAAS:
    * LoginContext: `Client`
    * Can use *kinit* or *keytab* method.
 
+ * Broker JVM flags:
+     * `-Dzookeeper.sasl.client.username={zookeeper-kerberos-service-name}` (OPTIONAL)
 
-## Zookeeper -> ZooKeeper Service (Replication)
+
+### Zookeeper &rarr; ZooKeeper Service (Replication)
 Zookeeper nodes must communication with each other for replication and leadership election.
 
 * Reuses JAAS configuration for Zookeeper Service
 
 
-## Zookeeper -> ZooKeeper (Leadership Election)
+### Zookeeper &rarr; ZooKeeper (Leadership Election)
 Zookeeper nodes must communication with each other for replication and leadership election.
 
 * Reuses JAAS configuration for Zookeeper Quorum and Learner Services
 (NB this is TODO in the demo!)
 
-## Confluent Metrics Reporter (Optional)
+### Confluent Metrics Reporter (Optional)
 
 TODO
 
-## Confluent Interceptor (Optional)
+### Confluent Interceptor (Optional)
 
 TODO
 
@@ -273,8 +282,14 @@ The steps above are sufficient to support Kerberos authenticated connections wit
 * super.users must include a user User:{kafka-kerberos-service-name}
 
 
-
-
-# References:
+# References
 
 * https://www.youtube.com/watch?v=KD2Q-2ToloE Video overview of Kerberos authentication process.
+
+# TODO
+
+* Configure 3 ZKs + 3 brokers in the cluster.
+* Configure kerberized Zookeeper.
+* Add the inline jaas options.
+* Add in the other security settings needed
+* Add in the confluent platform links.
