@@ -20,6 +20,16 @@ docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zookeepe
 docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zookeeper/zookeeper2.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
 docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zookeeper/zookeeper3.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
 
+# Add principals for Zookeeper quorum (server & learner)
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zkquorum/zookeeper1.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zkquorum/zookeeper2.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zkquorum/zookeeper3.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
+
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey learner/zookeeper1.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey learner/zookeeper2.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey learner/zookeeper3.kerberos_default@TEST.CONFLUENT.IO"  > /dev/null
+
+
 # Create a principal with which to connect to Zookeeper from brokers - NB you must use the same credential on all brokers!
 # (If you use ZK acls....)
 docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zkclient@TEST.CONFLUENT.IO"  > /dev/null
@@ -50,8 +60,17 @@ docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka
 docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka3.key -norandkey kafka/kafka3.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
 
 docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper1.key -norandkey zookeeper/zookeeper1.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper1.key -norandkey zkquorum/zookeeper1.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper1.key -norandkey learner/zookeeper1.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+
 docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper2.key -norandkey zookeeper/zookeeper2.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper2.key -norandkey zkquorum/zookeeper2.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper2.key -norandkey learner/zookeeper2.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+
 docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper3.key -norandkey zookeeper/zookeeper3.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper3.key -norandkey zkquorum/zookeeper3.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper3.key -norandkey learner/zookeeper3.kerberos_default@TEST.CONFLUENT.IO " > /dev/null
+
 
 docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper-client.key -norandkey zkclient@TEST.CONFLUENT.IO " > /dev/null
 docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka-client.key -norandkey kafka_producer@TEST.CONFLUENT.IO " > /dev/null
@@ -73,6 +92,7 @@ docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka
 #
 # Starting zookeeper and kafka now that the keytab has been created with the required credentials and services
 docker-compose up -d
+
 #
 # # Adding ACLs for consumer and producer user
 # TODO: ------------

@@ -1,5 +1,15 @@
 version: '3.5'
 services:
+  # Base docker builds:
+  kafka-base:
+    build: kafka-base/
+    image: kerberos-demo/kafka-base
+
+  zookeeper-base:
+    build: zookeeper-base/
+    image: kerberos-demo/zookeeper-base
+
+
   kdc:
     build: kdc/
     hostname: kdc
@@ -11,6 +21,9 @@ services:
     volumes:
       - secret:/var/lib/secret
       - ./kdc/krb5.conf:/etc/kdc/krb5.conf
+    ports:
+      - "8889:88"
+
 
   zookeeper1:
     build: zookeeper1/
@@ -21,6 +34,7 @@ services:
       - kerberos_default
 
     depends_on:
+      - zookeeper-base
       - kdc
     # Required to wait for the keytab to get generated
     restart: on-failure
@@ -30,6 +44,45 @@ services:
       - secret:/var/lib/secret
       - ./kdc/krb5.conf:/etc/krb5.conf
 
+  zookeeper2:
+    build: zookeeper2/
+    container_name: zookeeper2
+    hostname: zookeeper2
+    domainname: kerberos_default
+    networks:
+      - kerberos_default
+
+    depends_on:
+      - zookeeper-base
+      - kdc
+    # Required to wait for the keytab to get generated
+    restart: on-failure
+    environment:
+      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf
+    volumes:
+      - secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+
+  zookeeper3:
+    build: zookeeper3/
+    container_name: zookeeper3
+    hostname: zookeeper3
+    domainname: kerberos_default
+    networks:
+      - kerberos_default
+
+    depends_on:
+      - zookeeper-base
+      - kdc
+    # Required to wait for the keytab to get generated
+    restart: on-failure
+    environment:
+      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf
+    volumes:
+      - secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+
+
   kafka1:
     build: kafka1/
     container_name: kafka1
@@ -37,9 +90,8 @@ services:
     domainname: kerberos_default
     networks:
       - kerberos_default
-    environment:
-      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf
     depends_on:
+      - kafka-base
       - zookeeper1
       - kdc
     # Required to wait for the keytab to get generated
@@ -47,7 +99,51 @@ services:
     volumes:
       - secret:/var/lib/secret
       - ./kdc/krb5.conf:/etc/krb5.conf
-    command: "sleep infinity"
+    #command: "sleep infinity"
+    # ports:
+    #   - "9092:9092/tcp"
+    #   - "9093:9093/tcp"
+
+  #
+  kafka2:
+    build: kafka2/
+    container_name: kafka2
+    hostname: kafka2
+    domainname: kerberos_default
+    networks:
+      - kerberos_default
+    depends_on:
+      - kafka-base
+      - zookeeper1
+      - kdc
+    # Required to wait for the keytab to get generated
+    restart: on-failure
+    volumes:
+      - secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+    #command: "sleep infinity"
+  #
+
+  #
+  kafka3:
+    build: kafka3/
+    container_name: kafka3
+    hostname: kafka3
+    domainname: kerberos_default
+    networks:
+      - kerberos_default
+    depends_on:
+      - kafka-base
+      - zookeeper1
+      - kdc
+    # Required to wait for the keytab to get generated
+    restart: on-failure
+    volumes:
+      - secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+    #command: "sleep infinity"
+  #
+
 
   client:
     build: client/

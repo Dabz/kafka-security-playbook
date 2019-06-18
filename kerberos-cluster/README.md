@@ -102,7 +102,7 @@ Applications must build support for each SASL mechanism - Kafka supports SCRAM(-
 *GSSAPI is the SASL mechanism which implements Kerberos*.
 
 
-## Java Authentication and Security Services (JAAS)
+## Java Authentication and Authorization Services (JAAS)
 
 JAAS is a Java's integrated, pluggable security service and Kafka uses the JAAS apis to implement SASL authentication. SASL authentication is configured using JAAS.
 Kerberos is configured using the JAAS *LoginModule* `com.sun.security.auth.module.Krb5LoginModule`.
@@ -293,3 +293,4 @@ The steps above are sufficient to support Kerberos authenticated connections wit
 * Add the inline jaas options.
 * Add in the other security settings needed
 * Add in the confluent platform links.
+* Replace UPN for confluent metrics reporter
