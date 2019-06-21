@@ -37,9 +37,9 @@ services:
     container_name: httpd
     hostname: httpd
     ports:
-      - "80:80"
+      - "18080:80"
     volumes:
-      - ./web:/usr/local/apache2/htdocs/
+      - ./web/:/usr/local/apache2/htdocs/
 
 volumes:
   secret: {}
