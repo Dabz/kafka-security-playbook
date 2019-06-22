@@ -6,44 +6,17 @@ if [ -z "${CA_ROOT_DIR+x}" ];
 then
 CA_ROOT_DIR='.'
 fi
+ITERMEDIATE_CA_DIR=$CA_ROOT_DIR/ca/intermediate
 
-cd $CA_ROOT_DIR/ca;
+source $CA_ROOT_DIR/utils/functions.sh
 
-mkdir intermediate
-cd intermediate
+mkdir -p $ITERMEDIATE_CA_DIR
 
-mkdir certs crl csr newcerts private
-chmod 700 private
-touch index.txt
-echo 1000 > serial
-echo 1000 > crlnumber
+setup_intermediate_ca_dir_structure $ITERMEDIATE_CA_DIR
 
-cp ../../configs/intermediate-ca.config openssl.cnf
+cp $CA_ROOT_DIR/configs/intermediate-ca.config $ITERMEDIATE_CA_DIR/openssl.cnf
 
-openssl genrsa -aes256 -passout pass:$DEFAULT_PASSWORD -out private/intermediate.key.pem 4096
-chmod 400 private/intermediate.key.pem
+(cd $ITERMEDIATE_CA_DIR; generate_intermediate_keys_and_certs)
 
-openssl req -config openssl.cnf -new -sha256 \
-     -passin pass:$DEFAULT_PASSWORD -passout pass:$DEFAULT_PASSWORD \
-     -key private/intermediate.key.pem \
-     -out csr/intermediate.csr.pem
-cd ..
-
-openssl ca -config openssl.cnf -extensions v3_intermediate_ca \
-          -days 3650 -notext -md sha256 \
-          -in intermediate/csr/intermediate.csr.pem \
-          -passin pass:$DEFAULT_PASSWORD \
-          -out intermediate/certs/intermediate.cert.pem
-
-chmod 444 intermediate/certs/intermediate.cert.pem
-
-## verification
-
-openssl x509 -noout -text -in intermediate/certs/intermediate.cert.pem
-openssl verify -CAfile certs/ca.cert.pem  intermediate/certs/intermediate.cert.pem
-
-## create the CA chain
-cat intermediate/certs/intermediate.cert.pem certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem
-chmod 444 intermediate/certs/ca-chain.cert.pem
-
-cd ..
+(cd $CA_ROOT_DIR/ca; sign_intermediate_cert_authority; verify_generate_intermediate_ca)
+(cd $CA_ROOT_DIR/ca; create_ca_chain)
