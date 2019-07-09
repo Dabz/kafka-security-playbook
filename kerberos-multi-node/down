@@ -1,2 +1,41 @@
 #!/bin/bash
-docker-compose stop ; docker-compose rm --force
+DESTROY=no
+if [ ! -f "${PWD}/docker-compose.yml" ]; then
+    echo "No docker-compose found. Exiting."
+    exit 2
+fi
+
+usage() 
+{
+    echo "Usage: $0 [-h] [-d]"
+    echo "-d destroy images.  They will be rebuilt next time"
+    exit 2
+}
+
+destroy() 
+{
+    docker-compose rm --force
+}
+
+stop_docker-compose()
+{
+    docker-compose stop
+}
+# Should use getopts here but, why?
+if [[ "${1}" == "-h" ]]; then
+    usage
+    exit 2
+fi
+
+if [[ "${1}" == "-d" ]]; then
+    echo "Stopping and destroying containers"
+    DESTROY=yes
+fi
+
+
+stop_docker-compose
+
+if [[ "${DESTROY}" == "yes" ]]; then
+    destroy
+fi
+
