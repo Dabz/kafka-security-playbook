@@ -14,7 +14,9 @@ docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/ad
 
 # Create server keys 
 docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zookeeper1/zookeeper.kerberos-multi-node_default@TEST.CONFLUENT.IO"  > /dev/null
+# princ for kafka0
 docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/kafka.kerberos-multi-node_default@TEST.CONFLUENT.IO"  > /dev/null
+# princ for kafka1
 docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/kafka1.kerberos-multi-node_default@TEST.CONFLUENT.IO"  > /dev/null
 
 # Create the keytab to use for Kafka

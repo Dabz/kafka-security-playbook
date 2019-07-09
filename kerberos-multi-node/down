@@ -21,6 +21,7 @@ stop_docker-compose()
 {
     docker-compose stop
 }
+
 # Should use getopts here but, why?
 if [[ "${1}" == "-h" ]]; then
     usage
@@ -32,8 +33,12 @@ if [[ "${1}" == "-d" ]]; then
     DESTROY=yes
 fi
 
-
-stop_docker-compose
+stop_docker-compose 
+if [[ $? != 0 ]]; then
+    echo "Stopping the docker-compose failed.  Exiting for manual cleanup"
+    echo "I suggest 'docker-compose ps'"
+    exit 2
+fi
 
 if [[ "${DESTROY}" == "yes" ]]; then
     destroy
