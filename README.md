@@ -1,6 +1,6 @@
 # Kafka security playbook
 
-This repository contains a set of docker images to demonstrate the security configuration of Kafka and the Confluent Platform. The purpose of this repository is **NOT** to provide production's ready images. It has been designed to be used as an example and to assist peoples configuring the security module of Apache Kafka. 
+This repository contains a set of docker images to demonstrate the security configuration of Kafka and the Confluent Platform. The purpose of this repository is **NOT** to provide production's ready images. It has been designed to be used as an example and to assist peoples configuring the security module of Apache Kafka.
 
 All images has been created from scratch without reusing previously created images, this, to emphasize code and configuration readability over best-practices. For official images, I would recommend you to rely on the [Docker Images for the Confluent Platform](https://github.com/confluentinc/cp-docker-images)
 
@@ -102,7 +102,7 @@ KafkaServer {
 };
 </pre>
 </details>
-	
+
 #### For further information
 * [Confluent documentation on SASL Scram](https://docs.confluent.io/current/kafka/authentication_sasl_scram.html)
 * [Zookeeper documentation on SASL Scram](https://cwiki.apache.org/confluence/display/ZOOKEEPER/Client-Server+mutual+authentication)
@@ -287,28 +287,28 @@ sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required \
 
 ## Oauth authentication via TLS encryption
 
-Kafka supports SASL authentication via Oauth bearer tokens. A sample playbook for secured oauth token authentication is contained in the oauth subfolder of this repository. 
+Kafka supports SASL authentication via Oauth bearer tokens. A sample playbook for secured oauth token authentication is contained in the oauth subfolder of this repository.
 
 ### Usage
 
 Prerequisites: jdk8, maven, docker-compose, openssl.
- 
+
 ```bash
 cd oauth
 ./up
 ```
 
-In this sample playbook both the identity of brokers (`sasl.mechanism.inter.broker.protocol=OAUTHBEARER` within server.properties) and the identity of clients (`sasl.mechanism=OAUTHBEARER` within consumer.properties) are verified by the brokers using oauth bearer tokens. 
+In this sample playbook both the identity of brokers (`sasl.mechanism.inter.broker.protocol=OAUTHBEARER` within server.properties) and the identity of clients (`sasl.mechanism=OAUTHBEARER` within consumer.properties) are verified by the brokers using oauth bearer tokens.
 
 Within this sample playbook oauth bearer tokens are generated and validated using the `jjwt` library without communication to an authorization server. In real life, this would be different.
 
 The class `OauthBearerLoginCallbackHandler` is used by the clients and by brokers to generate a JWT token using a shared secret. This class is configured within the `client.properties file:
 
-Note that the client does not need to have a keystore configured, since client authentication is achieved using bearer tokens. 
-Still it needs a truststore to store the brokers certificate authorities. 
+Note that the client does not need to have a keystore configured, since client authentication is achieved using bearer tokens.
+Still it needs a truststore to store the brokers certificate authorities.
 
 <details>
-	<summary><a href="oauth/kafka/client.properties">kafka consumer and prodcuer configuration</a></summary>
+	<summary><a href="oauth/kafka/client.properties">kafka consumer and producer configuration</a></summary>
 <pre>
 security.protocol=SASL_SSL
 sasl.mechanism=OAUTHBEARER
@@ -338,7 +338,10 @@ ssl.key.password=secret
 </pre>
 </details>
 
-Kafka brokers need a keystore to store its private certificate as well as a truststore to verify the identity of other brokers. 
+Kafka brokers need a keystore to store its private certificate as well as a truststore to verify the identity of other brokers.
+
+## Schema registry basic security
+
 
 ### Further information
 
