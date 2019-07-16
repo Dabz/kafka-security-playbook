@@ -342,6 +342,40 @@ Kafka brokers need a keystore to store its private certificate as well as a trus
 
 ## Schema registry basic security
 
+According to documentation the schema registry plugin only supports SSL principals, but there is an undocumented separate authentication possibility via Jetty Authentication.
+
+```bash
+cd schema-registry-basic-auth
+./up
+```
+
+Now you can access the schema registry REST interface on `http://localhost:8089`
+
+Note that in order to test the schema registry properly, you need to either `curl` into it, or use the `kafka-avro-consule-producer` and consumer. The latter require special considerations.
+
+First, access via `curl`:
+
+```
+curl -X GET http://localhost:8089 -u admin:admin
+```
+
+If you want to try out the console producer, you need to exec into the schema-registry docker image and then run the producer:
+
+```
+docker-compose exec schema-registry bash
+kafka-avro-console-producer --broker-list kafka:9092 --topic avro-test --property \
+   value.schema='{"type":"record","name":"myrecord","fields":[{"name":"f1","type":"string"}]}' \
+   --property basic.auth.credentials.source=USER_INFO \
+   --property schema.registry.basic.auth.user.info=write:write
+
+> {"f1": "value1"}
+> {"f1": "value2"}
+> ^D
+```
+
+Note that the official documentation is wrong on two accounts. First, to define the source, you need to use `basic.auth.credentials.source` without the `schema.registry` in front of it.
+
+Second, user authentication via a property file gets ignored, you need to pass the credentials via `--property`.
 
 ### Further information
 
