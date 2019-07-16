@@ -22,6 +22,7 @@ COPY log4j.properties /etc/kafka/log4j.properties
 COPY alice.properties /etc/kafka/alice.properties
 COPY barnie.properties /etc/kafka/barnie.properties
 COPY charlie.properties /etc/kafka/charlie.properties
+COPY kafka.properties /etc/kafka/kafka.properties
 
 EXPOSE 9093
 
