@@ -7,18 +7,19 @@ RUN rpm --import https://packages.confluent.io/rpm/5.1/archive.key
 COPY confluent.repo /etc/yum.repos.d/confluent.repo
 RUN yum clean all
 
-# 2. Install zookeeper and kafka
+# 2. Install confluent kafka tools:
 RUN yum install -y java-1.8.0-openjdk
 RUN yum install -y confluent-kafka-2.11
-RUN yum install -y confluent-control-center
 
-# 3. Configure Kafka for Kerberos
+# 3. Install Kerberos libaries
 RUN yum install -y krb5-workstation krb5-libs
-COPY server.properties /etc/kafka/server.properties
-COPY kafka.sasl.jaas.config /etc/kafka/kafka_server_jaas.conf
 
-EXPOSE 9093
+# 4. Copy in required settings for client access to Kafka
+COPY consumer.properties /etc/kafka/consumer.properties
+COPY producer.properties /etc/kafka/producer.properties
+COPY command.properties /etc/kafka/command.properties
+COPY client.sasl.jaas.config /etc/kafka/client_jaas.conf
 
 ENV KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf
 
-CMD kafka-server-start /etc/kafka/server.properties
+CMD sleep infinity

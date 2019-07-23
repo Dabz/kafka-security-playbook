@@ -1,8 +1,8 @@
-version: '3'
+version: '3.5'
 services:
   kdc:
-    hostname: kdc
-    domainname: kerberos_default
+    hostname: kdc.kerberos-demo.local
+    #domainname: kerberos_default
     build: kdc/
     container_name: kdc
     volumes:
@@ -12,15 +12,12 @@ services:
   zookeeper:
     build: zookeeper/
     container_name: zookeeper
-    hostname: zookeeper
-    domainname: kerberos_default
-    depends_on: 
+    hostname: zookeeper.kerberos-demo.local
+    #domainname: kerberos_default
+    depends_on:
       - kdc
     # Required to wait for the keytab to get generated
     restart: on-failure
-    environment:
-        # - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf -Dsun.security.krb5.debug=true
-      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf
     volumes:
       - secret:/var/lib/secret
       - ./kdc/krb5.conf:/etc/krb5.conf
@@ -28,12 +25,9 @@ services:
   kafka:
     build: kafka/
     container_name: kafka
-    hostname: kafka
-    domainname: kerberos_default
-    environment:
-        # - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dsun.security.krb5.debug=true -Dzookeeper.sasl.client.username=zookeeper1
-      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dzookeeper.sasl.client.username=zookeeper1
-    depends_on: 
+    hostname: kafka.kerberos-demo.local
+    #domainname: kerberos_default
+    depends_on:
       - zookeeper
       - kdc
     # Required to wait for the keytab to get generated
@@ -42,5 +36,22 @@ services:
       - secret:/var/lib/secret
       - ./kdc/krb5.conf:/etc/krb5.conf
 
+  client:
+    build: client/
+    container_name: client
+    hostname: client.kerberos-demo.local
+    #domainname: kerberos_default
+    depends_on:
+      - kafka
+      - kdc
+    # Required to wait for the keytab to get generated
+    volumes:
+      - secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+
 volumes:
   secret: {}
+
+networks:
+  default:
+    name: kerberos-demo.local
