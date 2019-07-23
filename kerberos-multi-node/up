@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# Starting kerberos,
+# Avoiding starting up all services at the begining to generate the keytab first 
+
+docker-compose build
+docker-compose up -d kdc
+
+# Create the required credential 
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/zookeeper@TEST.CONFLUENT.IO" > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka_producer/producer@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka_consumer/consumer@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/admin@TEST.CONFLUENT.IO"  > /dev/null
+
+# Create server keys 
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zookeeper1/zookeeper.kerberos-multi-node_default@TEST.CONFLUENT.IO"  > /dev/null
+# princ for kafka0
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/kafka.kerberos-multi-node_default@TEST.CONFLUENT.IO"  > /dev/null
+# princ for kafka1
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/kafka1.kerberos-multi-node_default@TEST.CONFLUENT.IO"  > /dev/null
+
+# Create the keytab to use for Kafka
+docker exec -ti kdc rm -f /var/lib/secret/kafka.key 2>&1 > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka.key -glob zookeeper1/*" > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka.key -glob kafka*" > /dev/null
+
+# Starting zookeeper and kafka now that the keytab has been created with the required credentials and services
+docker-compose up -d 
+
+# Adding ACLs for consumer and producer user
+docker-compose exec kafka bash -c "kinit -k -t /var/lib/secret/kafka.key kafka/admin && kafka-acls  --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:kafka_producer --producer --topic=*"
+docker-compose exec kafka bash -c "kinit -k -t /var/lib/secret/kafka.key kafka/admin && kafka-acls  --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:kafka_consumer --consumer --topic=* --group=*"
+
+echo "Example configuration to access kafka:"
+echo "-> docker-compose exec kafka bash -c 'kinit -k -t /var/lib/secret/kafka.key kafka_producer/producer && kafka-console-producer --broker-list kafka:9093 --topic test --producer.config /etc/kafka/consumer.properties'"
+echo "-> docker-compose exec kafka bash -c 'kinit -k -t /var/lib/secret/kafka.key kafka_consumer/consumer && kafka-console-consumer --bootstrap-server kafka:9093 --topic test --consumer.config /etc/kafka/consumer.properties --from-beginning'"
