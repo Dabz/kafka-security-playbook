@@ -1,6 +1,6 @@
 # Kafka security playbook
 
-This repository contains a set of docker images to demonstrate the security configuration of Kafka and the Confluent Platform. The purpose of this repository is **NOT** to provide production's ready images. It has been designed to be used as an example and to assist peoples configuring the security module of Apache Kafka. 
+This repository contains a set of docker images to demonstrate the security configuration of Kafka and the Confluent Platform. The purpose of this repository is **NOT** to provide production's ready images. It has been designed to be used as an example and to assist peoples configuring the security module of Apache Kafka.
 
 All images has been created from scratch without reusing previously created images, this, to emphasize code and configuration readability over best-practices. For official images, I would recommend you to rely on the [Docker Images for the Confluent Platform](https://github.com/confluentinc/cp-docker-images)
 
@@ -102,7 +102,7 @@ KafkaServer {
 };
 </pre>
 </details>
-	
+
 #### For further information
 * [Confluent documentation on SASL Scram](https://docs.confluent.io/current/kafka/authentication_sasl_scram.html)
 * [Zookeeper documentation on SASL Scram](https://cwiki.apache.org/confluence/display/ZOOKEEPER/Client-Server+mutual+authentication)
@@ -287,28 +287,28 @@ sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required \
 
 ## Oauth authentication via TLS encryption
 
-Kafka supports SASL authentication via Oauth bearer tokens. A sample playbook for secured oauth token authentication is contained in the oauth subfolder of this repository. 
+Kafka supports SASL authentication via Oauth bearer tokens. A sample playbook for secured oauth token authentication is contained in the oauth subfolder of this repository.
 
 ### Usage
 
 Prerequisites: jdk8, maven, docker-compose, openssl.
- 
+
 ```bash
 cd oauth
 ./up
 ```
 
-In this sample playbook both the identity of brokers (`sasl.mechanism.inter.broker.protocol=OAUTHBEARER` within server.properties) and the identity of clients (`sasl.mechanism=OAUTHBEARER` within consumer.properties) are verified by the brokers using oauth bearer tokens. 
+In this sample playbook both the identity of brokers (`sasl.mechanism.inter.broker.protocol=OAUTHBEARER` within server.properties) and the identity of clients (`sasl.mechanism=OAUTHBEARER` within consumer.properties) are verified by the brokers using oauth bearer tokens.
 
 Within this sample playbook oauth bearer tokens are generated and validated using the `jjwt` library without communication to an authorization server. In real life, this would be different.
 
 The class `OauthBearerLoginCallbackHandler` is used by the clients and by brokers to generate a JWT token using a shared secret. This class is configured within the `client.properties file:
 
-Note that the client does not need to have a keystore configured, since client authentication is achieved using bearer tokens. 
-Still it needs a truststore to store the brokers certificate authorities. 
+Note that the client does not need to have a keystore configured, since client authentication is achieved using bearer tokens.
+Still it needs a truststore to store the brokers certificate authorities.
 
 <details>
-	<summary><a href="oauth/kafka/client.properties">kafka consumer and prodcuer configuration</a></summary>
+	<summary><a href="oauth/kafka/client.properties">kafka consumer and producer configuration</a></summary>
 <pre>
 security.protocol=SASL_SSL
 sasl.mechanism=OAUTHBEARER
@@ -338,7 +338,44 @@ ssl.key.password=secret
 </pre>
 </details>
 
-Kafka brokers need a keystore to store its private certificate as well as a truststore to verify the identity of other brokers. 
+Kafka brokers need a keystore to store its private certificate as well as a truststore to verify the identity of other brokers.
+
+## Schema registry basic security
+
+According to documentation the schema registry plugin only supports SSL principals, but there is an undocumented separate authentication possibility via Jetty Authentication.
+
+```bash
+cd schema-registry-basic-auth
+./up
+```
+
+Now you can access the schema registry REST interface on `http://localhost:8089`
+
+Note that in order to test the schema registry properly, you need to either `curl` into it, or use the `kafka-avro-consule-producer` and consumer. The latter require special considerations.
+
+First, access via `curl`:
+
+```
+curl -X GET http://localhost:8089 -u admin:admin
+```
+
+If you want to try out the console producer, you need to exec into the schema-registry docker image and then run the producer:
+
+```
+docker-compose exec schema-registry bash
+kafka-avro-console-producer --broker-list kafka:9092 --topic avro-test --property \
+   value.schema='{"type":"record","name":"myrecord","fields":[{"name":"f1","type":"string"}]}' \
+   --property basic.auth.credentials.source=USER_INFO \
+   --property schema.registry.basic.auth.user.info=write:write
+
+> {"f1": "value1"}
+> {"f1": "value2"}
+> ^D
+```
+
+Note that the official documentation is wrong on two accounts. First, to define the source, you need to use `basic.auth.credentials.source` without the `schema.registry` in front of it.
+
+Second, user authentication via a property file gets ignored, you need to pass the credentials via `--property`.
 
 ### Further information
 
