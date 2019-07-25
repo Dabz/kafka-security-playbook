@@ -302,7 +302,7 @@ In this sample playbook both the identity of brokers (`sasl.mechanism.inter.brok
 
 Within this sample playbook oauth bearer tokens are generated and validated using the `jjwt` library without communication to an authorization server. In real life, this would be different.
 
-The class `OauthBearerLoginCallbackHandler` is used by the clients and by brokers to generate a JWT token using a shared secret. This class is configured within the `client.properties file:
+The class `OauthBearerLoginCallbackHandler` is used by the clients and by brokers to generate a JWT token using a shared secret. This class is configured within the `client.properties` file:
 
 Note that the client does not need to have a keystore configured, since client authentication is achieved using bearer tokens.
 Still it needs a truststore to store the brokers certificate authorities.
@@ -339,6 +339,11 @@ ssl.key.password=secret
 </details>
 
 Kafka brokers need a keystore to store its private certificate as well as a truststore to verify the identity of other brokers.
+
+### Further information
+
+* [Confluent documentation on Oauth authentication](https://docs.confluent.io/current/kafka/authentication_sasl/authentication_sasl_oauth.html)
+* [Blog Post](https://medium.com/@jairsjunior/how-to-setup-oauth2-mechanism-to-a-kafka-broker-e42e72839fe)
 
 ## Schema registry basic security
 
@@ -377,7 +382,16 @@ Note that the official documentation is wrong on two accounts. First, to define 
 
 Second, user authentication via a property file gets ignored, you need to pass the credentials via `--property`.
 
-### Further information
+## Schema registry semi-open security
 
-* [Confluent documentation on Oauth authentication](https://docs.confluent.io/current/kafka/authentication_sasl/authentication_sasl_oauth.html)
-* [Blog Post](https://medium.com/@jairsjunior/how-to-setup-oauth2-mechanism-to-a-kafka-broker-e42e72839fe)
+This playbook is an example of configuration where Schema Registry is configured for accepting request on `http` and `https`.
+Requests on the `http` endpoint are actually identified as the `ANONYMOUS` user. This is possible thanks to the `confluent.schema.registry.anonymous.principal=true` option.
+
+The following ACLs are configured:
+- `sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p 'ANONYMOUS' -o 'SUBJECT_READ'`
+- `sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -p 'ANONYMOUS' -o 'GLOBAL_SUBJECTS_READ'`
+- `sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -p 'ANONYMOUS' -o 'GLOBAL_COMPATIBILITY_READ'`
+- `sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p 'C=UK,O=Confluent,L=London,CN=schema-registry' -o '*'`
+
+With this configuration, ` curl  -X GET http://localhost:8089/subjects/` is successful, but the `ANONYMOUS` user does not have the privileges to write new schemas.
+Only the client with the TLS client certificate `C=UK,O=Confluent,L=London,CN=schema-registry` can write new schemas, this could be for example your CI tool or an admin user.
