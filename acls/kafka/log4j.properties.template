@@ -20,7 +20,7 @@ log4j.additivity.kafka.authorizer.logger=false
  'kafka.controller': 'TRACE',
  'kafka.log.LogCleaner': 'INFO',
  'state.change.logger': 'TRACE',
- 'kafka.authorizer.logger': 'WARN, authorizerAppender'
+ 'kafka.authorizer.logger': 'DEBUG, authorizerAppender'
  } -%}
 
 
