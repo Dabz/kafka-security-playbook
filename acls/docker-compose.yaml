@@ -18,7 +18,7 @@ services:
     volumes:
       - "$PWD/zookeeper.sasl.jaas.conf:/tmp/zookeeper.sasl.jaas.conf" 
   kafka:
-    image: confluentinc/cp-enterprise-kafka:5.3.0
+    build: kafka/
     hostname: kafka
     container_name: kafka
     depends_on:
@@ -36,11 +36,11 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_SASL_ENABLED_MECHANISMS: "SCRAM-SHA-256"
       KAFKA_ZOOKEEPER_SET_ACL: "true"
+      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.auth.SimpleAclAuthorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
+      KAFKA_SUPER_USERS: "User:kafka;User:admin"
       KAFKA_JMX_PORT: 9999
       KAFKA_JMX_HOSTNAME: kafka
       KAFKA_OPTS: "-Djava.security.auth.login.config=/tmp/kafka.sasl.jaas.conf"
     ports:
       - 9092:9092
-    volumes:
-        - "$PWD/kafka.sasl.jaas.conf:/tmp/kafka.sasl.jaas.conf"
-        - "$PWD/kafka.conf:/tmp/kafka.conf"

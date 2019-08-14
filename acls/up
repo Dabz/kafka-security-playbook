@@ -10,9 +10,11 @@ docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add
 docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=consumer-pass],SCRAM-SHA-512=[password=consumer-pass]' --entity-type users --entity-name consumer
 
 echo "Example configuration:"
-echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --producer.config /etc/kafka/consumer.properties --topic test"
-echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config /etc/kafka/consumer.properties --topic test --from-beginning"
-echo "ZooKeeper shell with authorization:"
+echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --producer.config /tmp/producer.conf --topic test"
+echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config /tmp/consumer.conf --topic test --from-beginning"
+echo "ZooKeeper shell with authorization from host:"
 echo "-> KAFKA_OPTS=\"-Djava.security.auth.login.config=/path/to/zookeeper.sasl.jaas.conf\" zookeeper-shell localhost:2181"
-echo "Kafkacat with authorization:"
+echo "ZooKeeper shell with authorization within container (KAFKA_OPTS already set):"
+echo "-> docker-compose exec kafka zookeeper-shell zookeeper:2181"
+echo "Kafkacat with authorization from host:"
 echo "-> kafkacat -L -b localhost:9092 -F kafkacat.conf"
