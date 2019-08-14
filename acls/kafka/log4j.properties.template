@@ -27,3 +27,8 @@ log4j.additivity.kafka.authorizer.logger=false
 {% if env['KAFKA_LOG4J_LOGGERS'] %}
 {% set loggers = parse_log4j_loggers(env['KAFKA_LOG4J_LOGGERS'], loggers) %}
 {% endif %}
+
+{% for logger,loglevel in loggers.iteritems() %}
+log4j.logger.{{logger}}={{loglevel}}
+{% endfor %}
+
