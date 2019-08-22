@@ -14,11 +14,11 @@ docker-compose exec kafka-1 kafka-acls  --authorizer-properties zookeeper.connec
 docker-compose exec kafka-1 kafka-acls  --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:consumer --consumer --topic=* --group=*
 
 echo "Example configuration:"
-echo "-> kafka-console-producer --broker-list localhost:9091 --producer.config /tmp/producer.conf --topic test"
-echo "-> kafka-console-consumer --bootstrap-server localhost:9092 --consumer.config /tmp/consumer.conf --topic test --from-beginning"
+echo "-> kafka-console-producer --broker-list localhost:9093 --producer.config kafka/producer.conf --topic test"
+echo "-> kafka-console-consumer --bootstrap-server localhost:9094 --consumer.config kafka/consumer.conf --topic test --from-beginning"
 echo "ZooKeeper shell with authorization from host:"
 echo "-> KAFKA_OPTS=\"-Djava.security.auth.login.config=zookeeper.sasl.jaas.conf\" zookeeper-shell localhost:2181"
 echo "ZooKeeper shell with authorization within container (KAFKA_OPTS already set):"
 echo "-> docker-compose exec kafka-1 zookeeper-shell zookeeper:2181"
 echo "Kafkacat with authorization from host:"
-echo "-> kafkacat -L -b localhost:9092 -F kafka/kafkacat.conf"
+echo "-> kafkacat -L -b localhost:9094 -F kafka/kafkacat.conf"
