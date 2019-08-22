@@ -17,21 +17,22 @@ services:
       - 2181:2181
     volumes:
       - "$PWD/zookeeper.sasl.jaas.conf:/tmp/zookeeper.sasl.jaas.conf" 
-  kafka:
+
+  kafka-1:
     build: kafka/
-    hostname: kafka
-    container_name: kafka
+    hostname: kafka-1
+    container_name: kafka-1
     depends_on:
       - zookeeper
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENERS: INTERNAL://kafka:19092, EXTERNAL://0.0.0.0:9092
+      KAFKA_LISTENERS: INTERNAL://kafka-1:19091, EXTERNAL://0.0.0.0:9091
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092, EXTERNAL://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-1:19091, EXTERNAL://localhost:9091
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
-      KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:19092
+      KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka-1:19091
       KAFKA_CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: "SCRAM-SHA-256"
       KAFKA_CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SASL_PLAINTEXT
       KAFKA_CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
@@ -43,7 +44,38 @@ services:
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
       KAFKA_SUPER_USERS: "User:kafka;User:admin"
       KAFKA_JMX_PORT: 9999
-      KAFKA_JMX_HOSTNAME: kafka
+      KAFKA_JMX_HOSTNAME: kafka-1
       KAFKA_OPTS: "-Djava.security.auth.login.config=/tmp/kafka.sasl.jaas.conf"
     ports:
-      - 9092:9092
+      - 9091:9091
+
+  kafka-2:
+    build: kafka/
+    hostname: kafka-2
+    container_name: kafka-2
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://kafka-2:19092, EXTERNAL://0.0.0.0:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-2:19092, EXTERNAL://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka-2:19092
+      KAFKA_CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: "SCRAM-SHA-256"
+      KAFKA_CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_SASL_ENABLED_MECHANISMS: "SCRAM-SHA-256"
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: "SCRAM-SHA-256"
+      KAFKA_ZOOKEEPER_SET_ACL: "true"
+      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.auth.SimpleAclAuthorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
+      KAFKA_SUPER_USERS: "User:kafka;User:admin"
+      KAFKA_JMX_PORT: 9999
+      KAFKA_JMX_HOSTNAME: kafka-2
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/tmp/kafka.sasl.jaas.conf"
+    ports:
+        - 9092:9092
