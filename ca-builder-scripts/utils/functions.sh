@@ -91,3 +91,7 @@ create_certificate_revokation_list () {
             -passin pass:$DEFAULT_PASSWORD \
             -out intermediate/crl/intermediate.crl.pem
 }
+
+revoke_cert () {
+  openssl ca -config intermediate/openssl.cnf -passin pass:$DEFAULT_PASSWORD -revoke "intermediate/certs/$1.cert.pem"
+}

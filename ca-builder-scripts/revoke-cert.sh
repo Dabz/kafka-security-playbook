@@ -8,8 +8,6 @@ then
 CA_ROOT_DIR='.'
 fi
 
-cd $CA_ROOT_DIR/ca;
+source $CA_ROOT_DIR/utils/functions.sh
 
-openssl ca -config intermediate/openssl.cnf -passin pass:$DEFAULT_PASSWORD -revoke "intermediate/certs/$1.cert.pem"
-
-cd ..;
+(cd $CA_ROOT_DIR/ca; revoke_cert $CERT )
