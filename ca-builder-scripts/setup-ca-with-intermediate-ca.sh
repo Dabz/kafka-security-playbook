@@ -9,7 +9,7 @@
 # argument to this script, or confluent by default.
 ##
 
-DEFAULT_PASSWORD=DEFAULT_PASSWORD=${1:-confluent}
+DEFAULT_PASSWORD=${1:-confluent}
 export CA_ROOT_DIR=`pwd`
 
 echo -e "Building the CA root setup\n"
