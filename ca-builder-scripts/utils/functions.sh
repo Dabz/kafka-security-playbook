@@ -85,3 +85,9 @@ generate_final_certificate () {
   # verify the chain trust
   openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/$HOSTNAME.cert.pem
 }
+
+create_certificate_revokation_list () {
+  openssl ca -config intermediate/openssl.cnf -gencrl \
+            -passin pass:$DEFAULT_PASSWORD \
+            -out intermediate/crl/intermediate.crl.pem
+}

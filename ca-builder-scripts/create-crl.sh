@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
+
+DEFAULT_PASSWORD=${1:-confluent}
+
 if [ -z "${CA_ROOT_DIR+x}" ];
 then
 CA_ROOT_DIR='.'
 fi
 
-cd $CA_ROOT_DIR/ca;
+source $CA_ROOT_DIR/utils/functions.sh
 
-openssl ca -config intermediate/openssl.cnf -gencrl \
-          -passin pass:confluent \
-          -out intermediate/crl/intermediate.crl.pem
-
-cd ..
+(cd $CA_ROOT_DIR/ca; create_certificate_revokation_list )
