@@ -1,0 +1,6 @@
+bin/
+certs/
+certs-old/
+tmp-dir
+images/
+zookeeper.properties
