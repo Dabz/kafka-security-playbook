@@ -5,6 +5,13 @@ Apache Zookeeper counter part.
 
 As of today, this only covers using Zookeeper 3.5.5 with the upcoming Apache Kafka 2.4 version. Using it in earlier versions is not properly tested.
 
+## Run the playbook.
+
+To run the playbook you need installed in your machine, docker, docker-compose.
+
+The playbook can be started by running the _$> ./up_ script.
+
+
 ### Configuration on Apache ZooKeeper
 
 Required environment variables:
