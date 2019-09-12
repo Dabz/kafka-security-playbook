@@ -1,0 +1,48 @@
+version: '3'
+services:
+  zookeeper:
+    build: zookeeper/
+    container_name: zookeeper
+    hostname: zookeeper
+    domainname: confluent.local
+    restart: on-failure
+    networks:
+      default:
+        aliases:
+          - zookeeper.confluent.local
+
+
+  kafka:
+    build: kafka/
+    container_name: kafka
+    hostname: kafka
+    domainname: confluent.local
+    depends_on:
+      - zookeeper
+    restart: on-failure
+    environment:
+       - KAFKA_OPTS=-Dcom.sun.security.enableCRLDP=true -Dcom.sun.net.ssl.checkRevocation=true
+    #  - KAFKA_OPTS=-Djavax.net.debug=all -Djava.security.debug=all
+    volumes:
+      - ./certs/:/var/lib/secret
+    networks:
+      default:
+        aliases:
+          - kafka.confluent.local
+    ports:
+      - "9093:9093"
+
+  apache:
+    image: 'httpd:2.4'
+    container_name: httpd
+    hostname: httpd
+    ports:
+      - "18080:80"
+    volumes:
+      - ./web/:/usr/local/apache2/htdocs/
+
+volumes:
+  secret: {}
+
+networks:
+  default:
