@@ -7,9 +7,6 @@ services:
     restart: on-failure
     environment:
       - SERVER_JVMFLAGS=-Dzookeeper.serverCnxnFactory=org.apache.zookeeper.server.NettyServerCnxnFactory
-    ports:
-      - 2181:2181
-      - 2182:2182
     volumes:
       - ./certs/zk-stores:/var/lib/secret
 
@@ -25,5 +22,4 @@ services:
     environment:
       - KAFKA_OPTS=-Dzookeeper.clientCnxnSocket=org.apache.zookeeper.ClientCnxnSocketNetty -Dzookeeper.client.secure=true -Dzookeeper.ssl.keyStore.location=/var/lib/secret/kafka.jks -Dzookeeper.ssl.keyStore.password=confluent -Dzookeeper.ssl.trustStore.location=/var/lib/secret/truststore.jks  -Dzookeeper.ssl.trustStore.password=confluent
     ports:
-      - 9092:9092
       - 29092:29092
