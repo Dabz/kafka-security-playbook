@@ -50,7 +50,6 @@ services:
     ports:
       - 18083:18083
     volumes:
-      - $PWD/scripts:/scripts
       - ./connect/secrets:/etc/kafka-connect/secrets
     environment:
       CONNECT_BOOTSTRAP_SERVERS: "kafka:29092"
