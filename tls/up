@@ -64,9 +64,14 @@ keytool -importkeystore -deststorepass test1234 -destkeystore certs/local-client
 
 keytool -keystore certs/truststore.jks -alias CARoot -import -file certs/ca.crt -storepass test1234  -noprompt -storetype PKCS12 
 
+# generate client PEM file for kafkacat
+
+openssl pkcs12 -in certs/client.p12 -out certs/client.pem -passin pass:test1234 -passout pass:test1234
+
 # Starting docker-compose services
 docker-compose up -d --build
 
 echo "Example configuration to access kafka:"
 echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka.confluent.local:9093 --topic test --producer.config /etc/kafka/consumer.properties"
 echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka.confluent.local:9093 --topic test --consumer.config /etc/kafka/consumer.properties --from-beginning"
+echo "-> docker-compose exec kafka kafkacat -L -b kafka.confluent.local:9093 -F /etc/kafka/kafkacat.conf -C -t test"
