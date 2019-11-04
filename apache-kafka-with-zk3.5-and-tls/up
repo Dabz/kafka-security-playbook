@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+set -e
+
+function gencert() {
+  if [ -a $1.jks ];
+  then
+    echo "The keystore $1.jks already exists";
+    exit;
+  fi
+
+  echo "Creating keystore $1.jks with a certificate and a key-pair for CN $1"
+  keytool -keystore $1.jks -alias $1 -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD -dname "CN=$1,OU=kafka,O=confluent,L=MS,ST=Berlin,C=DE"
+  echo "Creating a Certificate-Signing-Request for the generated certificate"
+  keytool -keystore $1.jks -alias $1 -certreq -file cert-file -storepass $PASSWORD
+  echo "Signing the Certificate-Signing-Request and adding an additional DNS-entry for localhost"
+  openssl x509 -req -CA ca-cert -CAkey ca-key -in cert-file -out cert-signed -days $VALIDITY -CAcreateserial -passin pass:$PASSWORD -extensions SAN -extfile <(printf "\n[SAN]\nsubjectAltName=DNS:$1,DNS:localhost")
+  echo "Importing the root-certificate for the CA into the keystore $1.jks"
+  keytool -keystore $1.jks -alias CARoot -import -file ca-cert -storepass $PASSWORD -noprompt
+  echo "Importing the signed certificate for CN $1 into the keystore $1.jks"
+  keytool -keystore $1.jks -alias $1 -import -file cert-signed -storepass $PASSWORD
+  echo "Removing obsolet files..."
+  rm -v cert-file cert-signed
+}
+
+function gentruststore() {
+  if [ -a ca-cert ];
+  then
+    echo "The root-certificate for the CA already exists...";
+  else
+    echo "Creating a x509-certificate for the CA...";
+    openssl req -new -x509 -subj "/C=DE/ST=Berlin/L=MS/O=confluent/OU=kafka/CN=Root-CA" -keyout ca-key -out ca-cert -days $VALIDITY -passout pass:$PASSWORD
+  fi
+  #
+
+  if [ -a truststore.jks ];
+  then
+    echo "The keystore truststore.jks already exists!";
+  else
+    echo "Importing the root-certificate of the CA into truststore.jks..."
+    keytool -keystore truststore.jks -storepass $PASSWORD -alias CARoot -import -file ca-cert -noprompt
+  fi
+}
+
+rm -rf certs
+rm -rf tmp-dir
+mkdir tmp-dir
+mkdir -p certs/kafka-stores
+mkdir -p certs/zk-stores
+
+VALIDITY=365
+PASSWORD=confluent
+
+
+(cd tmp-dir; gentruststore)
+
+hosts=( "zookeeper" "client" "kafka")
+
+for host in "${hosts[@]}"
+do
+  (cd tmp-dir; gencert $host )
+done
+
+cp tmp-dir/truststore.jks certs/kafka-stores
+cp tmp-dir/truststore.jks certs/zk-stores
+cp tmp-dir/zookeeper.jks certs/zk-stores
+cp tmp-dir/kafka.jks certs/kafka-stores
+
+# Starting docker-compose services
+docker-compose up -d --build
+
+echo "Example configuration to access kafka:"
+echo "-> docker-compose exec kafka kafka-topics.sh --bootstrap-server kafka:9092 --create --topic foo --partitions 1 --replication-factor 1"
+echo "-> docker-compose exec kafka kafka-console-producer.sh --broker-list kafka:9092 --topic foo"
+echo "-> docker-compose exec kafka kafka-console-consumer.sh --bootstrap-server kafka:9092  --topic foo --from-beginning"

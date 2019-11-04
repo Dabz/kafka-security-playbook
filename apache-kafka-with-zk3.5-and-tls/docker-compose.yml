@@ -1,0 +1,25 @@
+version: '3'
+services:
+  zookeeper:
+    build: zookeeper/
+    container_name: zookeeper
+    hostname: zookeeper
+    restart: on-failure
+    environment:
+      - SERVER_JVMFLAGS=-Dzookeeper.serverCnxnFactory=org.apache.zookeeper.server.NettyServerCnxnFactory
+    volumes:
+      - ./certs/zk-stores:/var/lib/secret
+
+  kafka:
+    build: kafka/
+    container_name: kafka
+    hostname: kafka
+    depends_on:
+      - zookeeper
+    restart: on-failure
+    volumes:
+      - ./certs/kafka-stores:/var/lib/secret
+    environment:
+      - KAFKA_OPTS=-Dzookeeper.clientCnxnSocket=org.apache.zookeeper.ClientCnxnSocketNetty -Dzookeeper.client.secure=true -Dzookeeper.ssl.keyStore.location=/var/lib/secret/kafka.jks -Dzookeeper.ssl.keyStore.password=confluent -Dzookeeper.ssl.trustStore.location=/var/lib/secret/truststore.jks  -Dzookeeper.ssl.trustStore.password=confluent
+    ports:
+      - 29092:29092
