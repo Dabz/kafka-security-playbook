@@ -1,7 +1,7 @@
 version: '3'
 services:
     ldap:
-        image: osixia/openldap:1.2.3
+        image: osixia/openldap:1.3.0
         hostname: ldap
         container_name: ldap
         environment:
@@ -15,7 +15,7 @@ services:
         command: "--copy-service"
 
     phpldapadmin-service:
-        image: osixia/phpldapadmin:0.7.2
+        image: osixia/phpldapadmin:0.9.0
         container_name: ldapadmin-service
         environment:
           - PHPLDAPADMIN_LDAP_HOSTS=ldap
