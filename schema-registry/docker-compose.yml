@@ -51,5 +51,6 @@ services:
       SCHEMA_REGISTRY_SSL_KEY_PASSWORD: confluent
       SCHEMA_REGISTRY_SCHEMA_REGISTRY_INTER_INSTANCE_PROTOCOL: "https"
       SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
+      SCHEMA_REGISTRY_SSL_CLIENT_AUTH: 'true'
       SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_AUTHORIZER_CLASS: io.confluent.kafka.schemaregistry.security.authorizer.schemaregistryacl.SchemaRegistryAclAuthorizer
       #SCHEMA_REGISTRY_SECURITY_PLUGINS_OPTS: -Djava.security.auth.login.config=/etc/schema-registry/kafka_client_jaas.conf
