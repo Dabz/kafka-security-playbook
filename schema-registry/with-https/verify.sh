@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 verify_ok_ssl_client_auth () {
-  cp -f ../ca-builder-scripts/ca/intermediate/private/$1.key.pem schema-registry/secrets/$1.key.pem
-  cp -f ../ca-builder-scripts/ca/intermediate/certs/ca-chain.cert.pem schema-registry/secrets/ca-chain.cert.pem
-  cp -f ../ca-builder-scripts/ca/intermediate/certs/$1.cert.pem schema-registry/secrets/$1.cert.pem
-  curl --key schema-registry/secrets/$1.key.pem --cacert schema-registry/secrets/ca-chain.cert.pem --cert schema-registry/secrets/$1.cert.pem:confluent https://localhost:8081
+  cp -f ../../ca-builder-scripts/ca/intermediate/private/$1.key.pem schema-registry/secrets/$1.key.pem
+  cp -f ../../ca-builder-scripts/ca/intermediate/certs/ca-chain.cert.pem schema-registry/secrets/ca-chain.cert.pem
+  cp -f ../../ca-builder-scripts/ca/intermediate/certs/$1.cert.pem schema-registry/secrets/$1.cert.pem
+  curl --key schema-registry/secrets/$1.key.pem --cacert schema-registry/secrets/ca-chain.cert.pem --cert schema-registry/secrets/$1.cert.pem:confluent https://localhost:8099
 }
 
 verify_ko_ssl_client_auth() {
@@ -23,7 +23,7 @@ verify_ko_ssl_client_auth() {
   openssl pkcs12 -in schema-registry/secrets/client.p12 -out schema-registry/secrets/client-client.pem -clcerts -nokeys -passin pass:confluent -passout pass:confluent
   openssl pkcs12 -in schema-registry/secrets/client.p12 -out schema-registry/secrets/client-key.pem -nocerts -passin pass:confluent -passout pass:confluent
 
-  curl --insecure --key schema-registry/secrets/client-key.pem --cacert schema-registry/secrets/client-ca.pem  --cert schema-registry/secrets/client-client.pem:confluent https://localhost:8081
+  curl --insecure --key schema-registry/secrets/client-key.pem --cacert schema-registry/secrets/client-ca.pem  --cert schema-registry/secrets/client-client.pem:confluent https://localhost:8099
 }
 
 

@@ -36,12 +36,13 @@ services:
       - zookeeper
       - kafka
     ports:
-      - 8081:8081
+      - "8089:8081"
+      - "8099:8082"
     volumes:
       - ./schema-registry/secrets/:/etc/kafka/secrets
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_LISTENERS: "https://0.0.0.0:8081"
+      SCHEMA_REGISTRY_LISTENERS: "https://0.0.0.0:8082,http://0.0.0.0:8081"
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
       SCHEMA_REGISTRY_RESOURCE_EXTENSION_CLASS: io.confluent.kafka.schemaregistry.security.SchemaRegistrySecurityResourceExtension
       SCHEMA_REGISTRY_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/schema-registry.truststore
@@ -52,5 +53,7 @@ services:
       SCHEMA_REGISTRY_SCHEMA_REGISTRY_INTER_INSTANCE_PROTOCOL: "https"
       SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
       SCHEMA_REGISTRY_SSL_CLIENT_AUTH: 'true'
+      SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_AUTH_MECHANISM: "SSL" # Default SSL
       SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_AUTHORIZER_CLASS: io.confluent.kafka.schemaregistry.security.authorizer.schemaregistryacl.SchemaRegistryAclAuthorizer
+      SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_ANONYMOUS_PRINCIPAL: "true"
       #SCHEMA_REGISTRY_SECURITY_PLUGINS_OPTS: -Djava.security.auth.login.config=/etc/schema-registry/kafka_client_jaas.conf
