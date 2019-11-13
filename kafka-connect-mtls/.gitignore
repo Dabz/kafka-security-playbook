@@ -1,1 +1,2 @@
-connect/secrets/*.pem
+connect/secrets/client-*.pem
+connect/secrets/client.p12
