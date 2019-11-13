@@ -42,5 +42,9 @@ function build_store {
 
 ## buildind stores for the brokers
 
-certs_array=("schema-registry")
-build_store "${certs_array[@]}" schema-registry
+certs_array=("kafka.confluent.local")
+build_store "${certs_array[@]}" broker
+
+## building stores for the producers
+certs_array=("producer2")
+build_store "${certs_array[@]}" client
