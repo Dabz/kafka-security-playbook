@@ -22,16 +22,6 @@ COPY kafkacat /usr/local/bin
 RUN chmod +x /usr/local/bin/kafkacat
 COPY kafkacat.conf /etc/kafka/kafkacat.conf
 
-# 5. Build kafkacat locally ...
-RUN yum group install "Development Tools" -y
-RUN yum install -y git
-RUN yum install -y gcc-c++ python-devel.x86_64 cyrus-sasl-devel.x86_64
-RUN yum install -y which 
-RUN yum install -y wget
-
-#RUN git clone https://github.com/edenhill/kafkacat
-#RUN kafkacat/bootstrap.sh
-
 EXPOSE 9093
 
 CMD kafka-server-start /etc/kafka/server.properties
