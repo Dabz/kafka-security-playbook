@@ -29,8 +29,8 @@ RUN yum install -y gcc-c++ python-devel.x86_64 cyrus-sasl-devel.x86_64
 RUN yum install -y which 
 RUN yum install -y wget
 
-RUN git clone https://github.com/edenhill/kafkacat
-RUN kafkacat/bootstrap.sh
+#RUN git clone https://github.com/edenhill/kafkacat
+#RUN kafkacat/bootstrap.sh
 
 EXPOSE 9093
 
