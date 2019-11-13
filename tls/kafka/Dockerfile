@@ -26,7 +26,8 @@ COPY kafkacat.conf /etc/kafka/kafkacat.conf
 RUN yum group install "Development Tools" -y
 RUN yum install -y git
 RUN yum install -y gcc-c++ python-devel.x86_64 cyrus-sasl-devel.x86_64
-RUN yum install -y which
+RUN yum install -y which 
+RUN yum install -y wget
 
 RUN git clone https://github.com/edenhill/kafkacat
 RUN kafkacat/bootstrap.sh
