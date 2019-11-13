@@ -1,2 +1,2 @@
-*.pem
-client.p12
+schema-registry/secrets/client*pem
+schema-registry/secrets/client.p12
