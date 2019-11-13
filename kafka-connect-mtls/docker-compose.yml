@@ -1,5 +1,5 @@
 ---
-version: '2'
+version: '3'
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:5.3.1
@@ -30,7 +30,7 @@ services:
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:5.1.0
+    image: confluentinc/cp-schema-registry:5.3.1
     depends_on:
       - zookeeper
       - kafka
