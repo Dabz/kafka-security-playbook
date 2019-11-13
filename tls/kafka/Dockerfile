@@ -22,6 +22,11 @@ COPY kafkacat /usr/local/bin
 RUN chmod +x /usr/local/bin/kafkacat
 COPY kafkacat.conf /etc/kafka/kafkacat.conf
 
+# 5. Build kafkacat locally ...
+RUN yum install -y git
+RUN git clone https://github.com/edenhill/kafkacat
+RUN kafkacat/bootstrap.sh
+
 EXPOSE 9093
 
 CMD kafka-server-start /etc/kafka/server.properties
