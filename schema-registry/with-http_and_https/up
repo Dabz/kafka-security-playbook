@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+docker-compose up -d
+
+# TODO: An ugly sleep to remove with the confluent utility belt at some point
+sleep 5
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p 'ANONYMOUS' -o 'SUBJECT_READ'
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -p 'ANONYMOUS' -o 'GLOBAL_SUBJECTS_READ'
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -p 'ANONYMOUS' -o 'GLOBAL_COMPATIBILITY_READ'
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p 'C=DE,O=Confluent Ltd,L=Berlin,CN=schema-registry' -o '*'
+
+echo "Schema Registry is listening on http://localhost:8089"
+echo "Schema Registry is listening on https://localhost:8099"
+echo "-> user:password                                     |  description"
+echo "-> _____________"
+echo "-> ANONYMOUS                                         |  Global read access"
+echo "-> C=DE,O=Confluent Ltd,L=Berlin,CN=schema-registry  |  Global access"
+
+echo ""
+echo ""
+
+echo "How to handle ACLs:"
+echo ""
+echo "List all existing ACLs"
+echo "$> docker-compose exec schema-registry sr-acl-cli --config ./etc/schema-registry/schema-registry.properties --list"
+echo "Add write access to subject test-subject-value for user Bob"
+echo "$> docker-compose exec schema-registry sr-acl-cli --config ./etc/schema-registry/schema-registry.properties --add -s test-subject-value -p Bob -o SUBJECT_WRITE"
+echo "Add an admin user"
+echo "$> docker-compose exec schema-registry sr-acl-cli --config ./etc/schema-registry/schema-registry.properties --add -s * -p schema-admin -o *"
+echo "Remove write access to subject test-subject-value for user Bob"
+echo "$> docker-compose exec schema-registry sr-acl-cli --config ./etc/schema-registry/schema-registry.properties --remove -s test-subject-value -p Bob -o SUBJECT_WRITE"

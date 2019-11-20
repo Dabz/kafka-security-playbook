@@ -9,7 +9,7 @@ req_extensions = v3_req
 countryName = UK
 organizationName = Confluent
 localityName = London
-commonName=schema-registry
+commonName=schema-registry.client
 
 [ v3_ca ]
 subjectKeyIdentifier=hash
@@ -22,8 +22,8 @@ subjectKeyIdentifier = hash
 basicConstraints = CA:FALSE
 nsComment = "OpenSSL Generated Certificate"
 keyUsage = critical, digitalSignature, keyEncipherment
-extendedKeyUsage = clientAuth, serverAuth
+extendedKeyUsage = clientAuth
 subjectAltName = @alt_names
 
 [ alt_names ]
-DNS.1=schema-registry
+DNS.1=localhost

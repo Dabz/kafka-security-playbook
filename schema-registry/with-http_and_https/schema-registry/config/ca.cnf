@@ -14,10 +14,10 @@ default_bits = 4096
 x509_extensions = v3_ca
 
 [ dn ]
-countryName = UK
+countryName = DE
 organizationName = Confluent
-localityName = London
-commonName = kafka.confluent.local
+localityName = Berlin
+commonName = schema-registry.confluent.local
 
 [ v3_ca ]
 subjectKeyIdentifier=hash
