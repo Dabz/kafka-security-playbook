@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+docker-compose up -d
+
+echo "to verify the connection use the check-ssl-client-auth.sh script"
