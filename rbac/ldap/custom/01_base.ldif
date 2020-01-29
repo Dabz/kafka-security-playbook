@@ -1,8 +1,8 @@
-dn: ou=users,{{ LDAP_BASE_DN }}
+dn: ou=users,dc=confluent,dc=io
 objectClass: organizationalUnit
 ou: Users
 
-dn: ou=groups,{{ LDAP_BASE_DN }}
+dn: ou=groups,dc=confluent,dc=io
 objectClass: organizationalUnit
 ou: Groups
 
