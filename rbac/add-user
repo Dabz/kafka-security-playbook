@@ -1,9 +1,0 @@
-#!/bin/sh
-
-# Creating the users
-docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=purbon-secret],SCRAM-SHA-512=[password=purbon-secret]' --entity-type users --entity-name purbon
-
-
-echo "Should succeed as the new user is in the group"
-echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --topic test-topic --producer.config=/service/kafka/users/purbon.properties"
-echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config /service/kafka/users/purbon.properties --topic test-topic --from-beginning"
