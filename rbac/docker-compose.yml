@@ -1,4 +1,4 @@
-version: '3'
+version: '3.4'
 services:
     ldap:
         image: osixia/openldap:1.2.3
@@ -25,3 +25,21 @@ services:
           - "6444:443"
         depends_on:
           - ldap
+
+    zookeeper:
+        image: ${REPOSITORY}/cp-zookeeper:${TAG}
+        hostname: zookeeper
+        container_name: zookeeper
+        ports:
+            - "2181:2181"
+        environment:
+            ZOOKEEPER_CLIENT_PORT: 2181
+            ZOOKEEPER_TICK_TIME: 2000
+        healthcheck:
+            test: nc -z localhost 2181
+            interval: 5s
+            retries: 5
+            start_period: 30s
+
+
+
