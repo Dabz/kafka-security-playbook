@@ -193,3 +193,50 @@ services:
           # KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
           # CONFLUENT_METRICS_ENABLE: 'true'
           # CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+
+    schema-registry:
+      image: ${REPOSITORY}/cp-schema-registry:${TAG}
+      hostname: schema-registry
+      container_name: schema-registry
+      depends_on:
+        - kafka
+      ports:
+        - "8081:8081"
+      volumes:
+        - ./conf:/tmp/conf
+      healthcheck:
+          test: nc -z localhost 8081
+          interval: 3s
+          retries: 15
+          start_period: 30s
+      environment:
+        CUB_CLASSPATH: '/etc/confluent/docker/docker-utils.jar:/usr/share/java/confluent-security/schema-registry/*:/usr/share/java/schema-registry/*'
+        SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+        SCHEMA_REGISTRY_HOST_NAME: schema-registry
+        # This is only needed if you don't have a license and would like to test as part of a trial period
+        SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+
+        # configure how to connect to kafka for SR to store its internal info
+        SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
+        SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: SASL_PLAINTEXT
+        SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM: OAUTHBEARER
+        SCHEMA_REGISTRY_KAFKASTORE_SASL_LOGIN_CALLBACK_HANDLER_CLASS: io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler
+        SCHEMA_REGISTRY_KAFKASTORE_SASL_JAAS_CONFIG: |
+                                                      \
+                                                      org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+                                                      username="barnie" \
+                                                      password="barnie-secret" \
+                                                      metadataServerUrls="http://kafka:8090";
+        SCHEMA_REGISTRY_KAFKASTORE_TOPIC: _schemas
+        SCHEMA_REGISTRY_DEBUG: 'true'
+
+        # ======================= RBAC =================================
+        SCHEMA_REGISTRY_SCHEMA_REGISTRY_RESOURCE_EXTENSION_CLASS: io.confluent.kafka.schemaregistry.security.SchemaRegistrySecurityResourceExtension
+        SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_AUTHORIZER_CLASS: io.confluent.kafka.schemaregistry.security.authorizer.rbac.RbacAuthorizer
+        SCHEMA_REGISTRY_REST_SERVLET_INITIALIZOR_CLASSES: io.confluent.common.security.jetty.initializer.InstallBearerOrBasicSecurityHandler
+        # how to connect to MDS
+        SCHEMA_REGISTRY_CONFLUENT_METADATA_BOOTSTRAP_SERVER_URLS: http://kafka:8090
+        SCHEMA_REGISTRY_CONFLUENT_METADATA_HTTP_AUTH_CREDENTIALS_PROVIDER: BASIC
+        SCHEMA_REGISTRY_CONFLUENT_METADATA_BASIC_AUTH_USER_INFO: barnie:barnie-secret
+        # public key to verify tokens during authentication
+        SCHEMA_REGISTRY_PUBLIC_KEY_PATH: /tmp/conf/public.pem
