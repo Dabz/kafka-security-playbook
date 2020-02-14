@@ -240,3 +240,146 @@ services:
         SCHEMA_REGISTRY_CONFLUENT_METADATA_BASIC_AUTH_USER_INFO: barnie:barnie-secret
         # public key to verify tokens during authentication
         SCHEMA_REGISTRY_PUBLIC_KEY_PATH: /tmp/conf/public.pem
+
+    connect:
+      image: ${REPOSITORY}/cp-server-connect:${TAG}
+      hostname: connect
+      container_name: connect
+      depends_on:
+        - kafka
+      ports:
+        - "8083:8083"
+      volumes:
+        - ./conf:/tmp/conf
+      # - ./connect-source:/tmp/connect-source
+      #  - ./connect-sink:/tmp/connect-sink
+      healthcheck:
+          test: nc -z localhost 8083
+          interval: 3s
+          retries: 20
+          start_period: 30s
+      environment:
+        CUB_CLASSPATH: '/etc/confluent/docker/docker-utils.jar:/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*'
+        # we can run without zookeeper connect in local environment
+        # CONNECT_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+
+        # general settings
+        CONNECT_REST_ADVERTISED_HOST_NAME: connect
+        CONNECT_REST_PORT: 8083
+        CONNECT_GROUP_ID: connect-cluster
+        # configs storage topic
+        CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
+        CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+        # offsets storage topic and settings
+        CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+        CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+        CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+        # status storage topic
+        CONNECT_STATUS_STORAGE_TOPIC: connect-status
+        CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+
+        # Default to Json converters:
+        CONNECT_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+        CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+        CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+        CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+
+        # Connect to broker
+        CONNECT_BOOTSTRAP_SERVERS: 'kafka:9092'
+        CONNECT_SECURITY_PROTOCOL: 'SASL_PLAINTEXT'
+        CONNECT_SASL_MECHANISM: 'OAUTHBEARER'
+        CONNECT_SASL_LOGIN_CALLBACK_HANDLER_CLASS: 'io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler'
+        CONNECT_SASL_JAAS_CONFIG: |
+                                  \
+                                  org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+                                  username="eva" \
+                                  password="eva-secret" \
+                                  metadataServerUrls="http://kafka:8090";
+        # Allow overriding configs on the connector level
+        CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: 'All'
+        # Default producer configs
+        CONNECT_PRODUCER_SECURITY_PROTOCOL: 'SASL_PLAINTEXT'
+        CONNECT_PRODUCER_SASL_MECHANISM: 'OAUTHBEARER'
+        CONNECT_PRODUCER_SASL_LOGIN_CALLBACK_HANDLER_CLASS: 'io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler'
+        # Default consumer configs
+        CONNECT_CONSUMER_SECURITY_PROTOCOL: 'SASL_PLAINTEXT'
+        CONNECT_CONSUMER_SASL_MECHANISM: 'OAUTHBEARER'
+        CONNECT_CONSUMER_SASL_LOGIN_CALLBACK_HANDLER_CLASS: 'io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler'
+        # Default admin config
+        CONNECT_ADMIN_SECURITY_PROTOCOL: 'SASL_PLAINTEXT'
+        CONNECT_ADMIN_SASL_MECHANISM: 'OAUTHBEARER'
+        CONNECT_ADMIN_SASL_LOGIN_CALLBACK_HANDLER_CLASS: 'io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler'
+        # Load confluent plugins
+        CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+        # ============================== RBAC ========================================
+        CONNECT_REST_EXTENSION_CLASSES: 'io.confluent.connect.security.ConnectSecurityExtension,io.confluent.connect.secretregistry.ConnectSecretRegistryExtension'
+        CONNECT_REST_SERVLET_INITIALIZOR_CLASSES: 'io.confluent.common.security.jetty.initializer.InstallBearerOrBasicSecurityHandler'
+        CONNECT_PUBLIC_KEY_PATH: '/tmp/conf/public.pem'
+        CONNECT_CONFLUENT_METADATA_BOOTSTRAP_SERVER_URLS: 'http://kafka:8090'
+        CONNECT_CONFLUENT_METADATA_BASIC_AUTH_USER_INFO: 'eva:eva-secret'
+        CONNECT_CONFLUENT_METADATA_HTTP_AUTH_CREDENTIALS_PROVIDER: 'BASIC'
+        # ========================= SECRET REGISTRY ==================================
+        CONNECT_CONFIG_PROVIDERS: 'secret'
+        CONNECT_CONFIG_PROVIDERS_SECRET_CLASS: 'io.confluent.connect.secretregistry.rbac.config.provider.InternalSecretConfigProvider'
+        CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_MASTER_ENCRYPTION_KEY: 'password1234'
+        CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_TOPIC: '_secrets'
+        CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:9092'
+        CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_SECURITY_PROTOCOL: 'SASL_PLAINTEXT'
+        CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_SASL_MECHANISM: 'OAUTHBEARER'
+        CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_SASL_LOGIN_CALLBACK_HANDLER_CLASS: 'io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler'
+        CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_SASL_JAAS_CONFIG: |
+                                                                            \
+                                                                            org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+                                                                            username="eva" \
+                                                                            password="eva-secret" \
+                                                                            metadataServerUrls="http://kafka:8090";
+
+    control-center:
+      image: ${REPOSITORY}/cp-enterprise-control-center:${TAG}
+      hostname: control-center
+      container_name: control-center
+      depends_on:
+        - 'zookeeper'
+        - 'kafka'
+        - 'connect'
+      ports:
+        - "9021:9021"
+      volumes:
+        - ./conf:/tmp/conf
+      environment:
+        # CUB CLASSPATH
+        CUB_CLASSPATH: '/etc/confluent/docker/docker-utils.jar:/usr/share/java/confluent-control-center/*:/usr/share/java/rest-utils/*:/usr/share/java/confluent-common/*'
+        # CUB_CLASSPATH: '/etc/confluent/docker/docker-utils.jar:/usr/share/java/confluent-control-center/*'
+        # general settings
+        CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka:9092'
+        CONTROL_CENTER_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+        CONTROL_CENTER_REPLICATION_FACTOR: 1
+        CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+        CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+        CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+        PORT: 9021
+
+        # ========================= other services ==============================
+        # connect
+        CONTROL_CENTER_CONNECT_CONNECT1_CLUSTER: http://connect:8083
+        # schema-registry
+        CONTROL_CENTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+
+        # ========================= RBAC =================================
+        CONTROL_CENTER_REST_AUTHENTICATION_METHOD: BEARER
+        PUBLIC_KEY_PATH: /tmp/conf/public.pem
+
+        CONFLUENT_METADATA_BASIC_AUTH_USER_INFO: charlie:charlie-secret
+        CONFLUENT_METADATA_BOOTSTRAP_SERVER_URLS: http://kafka:8090
+
+        CONTROL_CENTER_STREAMS_SECURITY_PROTOCOL: SASL_PLAINTEXT
+        # The following configs are not required by C3 itself, but are required by cub to be able to connect to kafka to check if its ready
+        # Seems like C3 would generate these configs when started, but cub runs before C3 starts, so it doesn't have access to these configs
+        CONTROL_CENTER_STREAMS_SASL_MECHANISM: OAUTHBEARER
+        CONTROL_CENTER_STREAMS_SASL_LOGIN_CALLBACK_HANDLER_CLASS: io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler
+        CONTROL_CENTER_STREAMS_SASL_JAAS_CONFIG: |
+                                                  \
+                                                  org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+                                                  username="charlie" \
+                                                  password="charlie-secret" \
+                                                  metadataServerUrls="http://kafka:8090";
