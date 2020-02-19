@@ -2,13 +2,13 @@
 version: '2'
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.3.1
+    image: confluentinc/cp-zookeeper:5.4.0
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    image: confluentinc/cp-enterprise-kafka:5.3.1
+    image: confluentinc/cp-enterprise-kafka:5.4.0
     depends_on:
       - zookeeper
     ports:
@@ -19,10 +19,8 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:29092
       CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:2181
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
@@ -30,7 +28,7 @@ services:
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:5.3.1
+    image: confluentinc/cp-schema-registry:5.4.0
     container_name: schema-registry
     depends_on:
       - zookeeper
@@ -44,6 +42,7 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_LISTENERS: "https://0.0.0.0:8082,http://0.0.0.0:8081"
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+      SCHEMA_REGISTRY_KAFKASTORE)BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
       SCHEMA_REGISTRY_RESOURCE_EXTENSION_CLASS: io.confluent.kafka.schemaregistry.security.SchemaRegistrySecurityResourceExtension
       SCHEMA_REGISTRY_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/schema-registry.truststore
       SCHEMA_REGISTRY_SSL_TRUSTSTORE_PASSWORD: confluent
