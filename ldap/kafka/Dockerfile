@@ -12,7 +12,6 @@ RUN yum install -y java-11-openjdk
 RUN yum install -y confluent-server
 RUN yum install -y confluent-security
 
-
 # 3. Configure Kafka and zookeeper for Kerberos
 COPY server.properties /etc/kafka/server.properties
 COPY server-with-ssl.properties /etc/kafka/server-with-ssl.properties
