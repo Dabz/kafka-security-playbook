@@ -17,7 +17,7 @@ pushd certs
 keytool -keystore kafka.server.keystore.jks \
         -alias localhost \
         -validity ${validity} \
-        -genkey \
+        -genkey -keyalg RSA \
         -storepass ${keystore_pass} \
         -key-pass ${key_pass} \
         -dname "CN=kafka.confluent.local, OU=CS, O=Confluent, L=Palo Alto, S=CA, C=US" \
