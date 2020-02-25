@@ -14,7 +14,9 @@ RUN yum install -y confluent-platform-2.12
 # 3. Configure Kafka and zookeeper for Kerberos 
 COPY server.properties /etc/kafka/server.properties
 COPY kafka.sasl.jaas.config /etc/kafka/kafka_server_jaas.conf
+COPY kafka.properties /etc/kafka/kafka.properties
 COPY consumer.properties /etc/kafka/consumer.properties
+COPY producer.properties /etc/kafka/producer.properties
 
 EXPOSE 9093
 

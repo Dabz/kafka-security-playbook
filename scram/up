@@ -6,7 +6,13 @@ docker-compose up -d --build
 # Creating the user kafka
 # kafka is configured as a super user, no need for additional ACL
 docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=kafka],SCRAM-SHA-512=[password=kafka]' --entity-type users --entity-name kafka
+docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=consumerpass],SCRAM-SHA-512=[password=consumerpass]' --entity-type users --entity-name consumer
+docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=producerpass],SCRAM-SHA-512=[password=producerpass]' --entity-type users --entity-name producer
+
+# ACLs
+docker-compose exec kafka kafka-acls  --bootstrap-server kafka:9093 --command-config /etc/kafka/kafka.properties --add --allow-principal User:producer --producer --topic=*
+docker-compose exec kafka kafka-acls  --bootstrap-server kafka:9093 --command-config /etc/kafka/kafka.properties --add --allow-principal User:consumer --consumer --topic=* --group=*
 
 echo "Example configuration:"
-echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --producer.config /etc/kafka/consumer.properties --topic test"
+echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --producer.config /etc/kafka/producer.properties --topic test"
 echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config /etc/kafka/consumer.properties --topic test --from-beginning"
