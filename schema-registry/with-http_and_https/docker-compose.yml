@@ -2,13 +2,13 @@
 version: '2'
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.4.0
+    image: confluentinc/cp-zookeeper:5.3.1
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    image: confluentinc/cp-enterprise-kafka:5.4.0
+    image: confluentinc/cp-enterprise-kafka:5.3.1
     depends_on:
       - zookeeper
     ports:
@@ -27,9 +27,22 @@ services:
       CONFLUENT_METRICS_ENABLE: 'true'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
 
+  client:
+    build: client/
+    container_name: client
+    hostname: client
+    depends_on:
+      - kafka
+    volumes:
+      - ./scripts-client:/scripts
+      - ./schema-registry/secrets/:/etc/kafka/secrets
+      - ./data:/data
+      - ./plugins:/plugins
+
   schema-registry:
-    image: confluentinc/cp-schema-registry:5.4.0
+    image: confluentinc/cp-schema-registry:5.3.1
     container_name: schema-registry
+    hostname: schema-registry
     depends_on:
       - zookeeper
       - kafka
@@ -38,21 +51,27 @@ services:
       - "8099:8082"
     volumes:
       - ./schema-registry/secrets/:/etc/kafka/secrets
+      - ./scripts:/scripts
+      - ./data:/data
+      - ./plugins:/plugins
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_LISTENERS: "https://0.0.0.0:8082,http://0.0.0.0:8081"
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
-      SCHEMA_REGISTRY_KAFKASTORE)BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
       SCHEMA_REGISTRY_RESOURCE_EXTENSION_CLASS: io.confluent.kafka.schemaregistry.security.SchemaRegistrySecurityResourceExtension
       SCHEMA_REGISTRY_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/schema-registry.truststore
       SCHEMA_REGISTRY_SSL_TRUSTSTORE_PASSWORD: confluent
       SCHEMA_REGISTRY_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/schema-registry.keystore
       SCHEMA_REGISTRY_SSL_KEYSTORE_PASSWORD: confluent
       SCHEMA_REGISTRY_SSL_KEY_PASSWORD: confluent
+      SCHEMA_REGISTRY_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ''
       SCHEMA_REGISTRY_SCHEMA_REGISTRY_INTER_INSTANCE_PROTOCOL: "https"
-      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: DEBUG
       SCHEMA_REGISTRY_SSL_CLIENT_AUTH: 'true'
       SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_AUTH_MECHANISM: "SSL" # Default SSL
       SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_AUTHORIZER_CLASS: io.confluent.kafka.schemaregistry.security.authorizer.schemaregistryacl.SchemaRegistryAclAuthorizer
       SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_ANONYMOUS_PRINCIPAL: "true"
+      #SCHEMA_REGISTRY_OPTS: '-javaagent:/plugins/verification.jar'
+      SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_SSL_PRINCIPAL_MAPPING_RULES: RULE:^CN=(.*?),.*/$$1/,DEFAULT
       #SCHEMA_REGISTRY_SECURITY_PLUGINS_OPTS: -Djava.security.auth.login.config=/etc/schema-registry/kafka_client_jaas.conf

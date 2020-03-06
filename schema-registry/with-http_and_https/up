@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
-docker-compose up -d
+docker-compose up -d --build
 
 # TODO: An ugly sleep to remove with the confluent utility belt at some point
 sleep 5
-docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p 'ANONYMOUS' -o 'SUBJECT_READ'
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p 'ANONYMOUS' -o '*'
 docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -p 'ANONYMOUS' -o 'GLOBAL_SUBJECTS_READ'
 docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -p 'ANONYMOUS' -o 'GLOBAL_COMPATIBILITY_READ'
-docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p 'C=DE,O=Confluent Ltd,L=Berlin,CN=schema-registry' -o '*'
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p 'CN=schema-registry,O=Confluent Ltd,L=Berlin,ST=Berlin,C=DE' -o '*'
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p 'CN=banana,O=Confluent Ltd,L=Berlin,ST=Berlin,C=DE' -o '*'
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p 'CN=client,O=Confluent Ltd,L=Berlin,ST=Berlin,C=DE' -o '*'
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p 'CN=avocado,O=Confluent Ltd,L=Berlin,ST=Berlin,C=DE' -o '*'
 
 echo "Schema Registry is listening on http://localhost:8089"
 echo "Schema Registry is listening on https://localhost:8099"
