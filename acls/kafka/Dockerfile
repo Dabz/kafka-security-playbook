@@ -1,4 +1,4 @@
-FROM confluentinc/cp-enterprise-kafka:5.3.1
+FROM confluentinc/cp-enterprise-kafka:5.4.0
 
 MAINTAINER sven@confluent.io
 

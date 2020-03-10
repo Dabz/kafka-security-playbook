@@ -1,14 +1,14 @@
 version: "2"
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.2.1
+    image: confluentinc/cp-zookeeper:5.4.0
     hostname: zookeeper
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
 
   kafka:
-    image: confluentinc/cp-kafka:5.2.1
+    image: confluentinc/cp-kafka:5.4.0
     container_name: kafka
     hostname: kafka
     depends_on:
@@ -21,7 +21,7 @@ services:
       KAFKA_BROKER_ID: "1"
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:5.2.1
+    image: confluentinc/cp-schema-registry:5.4.0
     hostname: schema-registry
     container_name: schema-registry
     depends_on:

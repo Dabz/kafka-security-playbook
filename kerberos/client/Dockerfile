@@ -1,4 +1,4 @@
-FROM centos
+FROM centos:centos7
 MAINTAINER d.gasparina@gmail.com
 ENV container docker
 

@@ -1,0 +1,15 @@
+dn: cn=greta,ou=users,{{ LDAP_BASE_DN }}
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: greta
+sn: Thunberg
+givenName: Greta
+cn: greta
+displayName: Greta Thunberg
+uidNumber: 10006
+gidNumber: 5000
+userPassword: greta-secret
+gecos: greta
+loginShell: /bin/bash
+homeDirectory: /home/greta

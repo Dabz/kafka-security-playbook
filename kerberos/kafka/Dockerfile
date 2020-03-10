@@ -1,4 +1,4 @@
-FROM centos
+FROM centos:centos8
 MAINTAINER d.gasparina@gmail.com
 ENV container docker
 
@@ -9,7 +9,6 @@ RUN yum clean all
 
 # 2. Install zookeeper and kafka
 RUN yum install -y java-11-openjdk
-# RUN yum install -y java-11-openjdk
 RUN yum install -y confluent-kafka-2.12
 RUN yum install -y confluent-control-center
 

@@ -1,9 +1,9 @@
-FROM centos:7
+FROM centos:centos8
 MAINTAINER d.gasparina@gmail.com
 ENV container docker
 
 # 1. Installing Kerberos server, admin and client
-RUN yum install -y krb5-server krb5-libs krb5-auth-dialog
+RUN yum install -y krb5-server krb5-libs 
 RUN yum install -y krb5-workstation krb5-libs 
 
 # 2. Configuring Kerberos and KDC
