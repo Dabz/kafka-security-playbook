@@ -1,45 +1,34 @@
 version: "2"
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.4.0
+    image: ${REPOSITORY}/cp-zookeeper:${TAG}
     hostname: zookeeper
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
 
   kafka:
-    image: confluentinc/cp-kafka:5.4.0
+    image: ${REPOSITORY}/cp-kafka:${TAG}
     container_name: kafka
     hostname: kafka
     depends_on:
       - zookeeper
     environment:
+      KAFKA_BROKER_ID: "1"
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+      KAFKA_ADVERTISED_LISTENERS: "SASL_PLAINTEXT://kafka:9092"
       KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: "1"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
-      KAFKA_BROKER_ID: "1"
-
-  schema-registry:
-    image: confluentinc/cp-schema-registry:5.4.0
-    hostname: schema-registry
-    container_name: schema-registry
-    depends_on:
-      - kafka
-    ports:
-      - "8089:8081"
-    environment:
-      SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "PLAINTEXT://kafka:9092"
-      SCHEMA_REGISTRY_AUTHENTICATION_METHOD: "BASIC"
-      SCHEMA_REGISTRY_AUTHENTICATION_ROLES: "write,read,admin"
-      SCHEMA_REGISTRY_AUTHENTICATION_REALM: "Schema"
-      SCHEMA_REGISTRY_OPTS: "-Djava.security.auth.login.config=/tmp/jaas_config.file"
-      SCHEMA_REGISTRY_SCHEMA_REGISTRY_RESOURCE_EXTENSION_CLASS: io.confluent.kafka.schemaregistry.security.SchemaRegistrySecurityResourceExtension
-      SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_AUTHORIZER_CLASS: io.confluent.kafka.schemaregistry.security.authorizer.schemaregistryacl.SchemaRegistryAclAuthorizer
-      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: "1"
-      SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_AUTH_MECHANISM: "JETTY_AUTH"
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN,SCRAM
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/kafka_jaas.conf
     volumes:
-      - ./jaas_config.file:/tmp/jaas_config.file
-      - ./password-file:/tmp/password-file
+        - $PWD/secrets:/etc/kafka/secrets
+
+  client:
+    image: ${REPOSITORY}/cp-kafka:${TAG}
+    container_name: client
+    hostname: client
+    depends_on:
+        - kafka
+    volumes:
+        - $PWD/secrets:/etc/kafka/secrets
