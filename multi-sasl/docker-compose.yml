@@ -1,4 +1,4 @@
-version: "2"
+version: "3"
 services:
   zookeeper:
     image: ${REPOSITORY}/cp-zookeeper:${TAG}
@@ -32,3 +32,4 @@ services:
         - kafka
     volumes:
         - $PWD/secrets:/etc/kafka/secrets
+    command: sleep infinity
