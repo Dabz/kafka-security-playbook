@@ -5,7 +5,11 @@ services:
     hostname: zookeeper
     container_name: zookeeper
     environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
+        ZOOKEEPER_CLIENT_PORT: 2181
+        KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/zookeeper.jaas.conf
+                  -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+    volumes:
+        - $PWD/secrets:/etc/kafka/secrets
 
   kafka:
     image: ${REPOSITORY}/cp-kafka:${TAG}
@@ -14,22 +18,27 @@ services:
     depends_on:
       - zookeeper
     environment:
-      KAFKA_BROKER_ID: "1"
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_ADVERTISED_LISTENERS: "SASL_PLAINTEXT://kafka:9092"
-      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: "1"
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
-      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN,SCRAM
-      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/kafka_jaas.conf
+        KAFKA_BROKER_ID: "1"
+        KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+        KAFKA_ADVERTISED_LISTENERS: "SASL_PLAINTEXT://kafka:9092"
+        KAFKA_SECURITY_INTER_BROKER_PROTOCOL: "SASL_PLAINTEXT"
+        KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: "PLAIN"
+        KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: "1"
+        KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+        KAFKA_SASL_ENABLED_MECHANISMS: "PLAIN,SCRAM-SHA-256"
+        KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: "false"
+        KAFKA_ZOOKEEPER_SET_ACL: "true"
+        KAFKA_SUPER_USERS: "User:plainadmin;User:scramadmin"
+        KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/kafka.jaas.conf
     volumes:
         - $PWD/secrets:/etc/kafka/secrets
 
   client:
-    image: ${REPOSITORY}/cp-kafka:${TAG}
-    container_name: client
-    hostname: client
-    depends_on:
-        - kafka
-    volumes:
-        - $PWD/secrets:/etc/kafka/secrets
-    command: sleep infinity
+        image: ${REPOSITORY}/cp-kafka:${TAG}
+        container_name: client
+        hostname: client
+        depends_on:
+            - kafka
+        volumes:
+            - $PWD/secrets:/etc/kafka/secrets
+        command: sleep infinity

@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+
+docker-compose up -d 
+
+# Creating the user kafka
+# kafka is configured as a super user, no need for additional ACL
+# Additional users defined
+
+docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=admin-secret],SCRAM-SHA-512=[password=admin-secret]' --entity-type users --entity-name scramadmin
+docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=consumerpass],SCRAM-SHA-512=[password=consumerpass]' --entity-type users --entity-name scramconsumer
+docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=producerpass],SCRAM-SHA-512=[password=producerpass]' --entity-type users --entity-name scramproducer
+
+echo "Example configuration:"
+echo "-> docker-compose exec client kafka-console-producer --broker-list kafka:9092 --producer.config /etc/kafka/secrets/scramproducer.properties --topic test"
+echo "-> docker-compose exec client kafka-console-consumer --bootstrap-server kafka:9092 --consumer.config /etc/kafka/scramconsumer.properties --topic test --from-beginning"
