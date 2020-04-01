@@ -18,6 +18,7 @@ RUN yum install -y krb5-workstation krb5-libs
 COPY consumer.properties /etc/kafka/consumer.properties
 COPY producer.properties /etc/kafka/producer.properties
 COPY command.properties /etc/kafka/command.properties
+COPY scram.properties /etc/kafka/scram.properties
 COPY client.sasl.jaas.config /etc/kafka/client_jaas.conf
 
 ENV KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf
