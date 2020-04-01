@@ -32,8 +32,6 @@ services:
       - kdc
     # Required to wait for the keytab to get generated
     restart: on-failure
-    ports:
-        - 5005:5005
     volumes:
       - secret:/var/lib/secret
       - ./kdc/krb5.conf:/etc/krb5.conf
