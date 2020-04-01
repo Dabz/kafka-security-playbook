@@ -8,4 +8,5 @@ docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add
 
 echo "Example configuration:"
 echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --producer.config /etc/kafka/consumer.properties --topic test"
+echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --producer.config /etc/kafka/consumer.plain.properties --topic test"
 echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config /etc/kafka/consumer.properties --topic test --from-beginning"
