@@ -7,6 +7,10 @@ proc slurp {file} {
     return $ret
 }
 
+proc create_certs {cert_name,machine} {
+  eval spawn ./create-pair-certs.sh $cert_name $machine server_cert
+}
+
 set timeout 20
 set configslurp [slurp configs/ca-config-vars]
 
@@ -18,8 +22,6 @@ set ORGANIZATION [lrange $lines 3 3]
 
 set cert_name [lindex $argv 0]
 set machine [lrange $argv 1 end]
-
-
 
 eval spawn ./create-pair-certs.sh $cert_name $machine server_cert
 
