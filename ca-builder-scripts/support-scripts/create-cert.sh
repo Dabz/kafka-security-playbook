@@ -45,4 +45,4 @@ expect "Sign the certificate?"
 send "y\r";
 expect "1 out of 1 certificate requests certified, commit?"
 send "y\r";
-interact
+#interact
