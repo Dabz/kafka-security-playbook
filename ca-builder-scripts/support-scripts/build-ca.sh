@@ -8,7 +8,7 @@ proc slurp {file} {
 }
 
 set timeout 20
-set configslurp [slurp ca-config]
+set configslurp [slurp configs/ca-config-vars]
 
 set lines [split $configslurp \n]
 set COUNTRY_NAME [lrange $lines 0 0]
