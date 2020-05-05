@@ -17,8 +17,11 @@ set LOCALITY [lrange $lines 2 2]
 set ORGANIZATION [lrange $lines 3 3]
 
 set cert_name [lindex $argv 0]
+set machine [lrange $argv 1 end]
 
-eval spawn ./create-pair-certs.sh $cert_name server_cert
+
+
+eval spawn ./create-pair-certs.sh $cert_name $machine server_cert
 
 ## Generating the data for the CA setup.
 expect "Country Name (2 letter code)"

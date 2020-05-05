@@ -60,10 +60,21 @@ create_ca_chain () {
   chmod 444 intermediate/certs/ca-chain.cert.pem
 }
 
+refresh_openssl_file() {
+  ca_root_dir=$1
+  intermediate_dir=$2
+  cp $ca_root_dir/configs/intermediate-ca.config $intermediate_dir/openssl.cnf
+}
+
 generate_final_certificate () {
+  alt_name=$1
   # create a private key
   openssl genrsa -aes256 -passout pass:$DEFAULT_PASSWORD  -out intermediate/private/$HOSTNAME.key.pem 2048
   chmod 400 intermediate/private/$HOSTNAME.key.pem
+
+  echo -e "[ alt_names ]" >> intermediate/openssl.cnf
+  echo -e "DNS.1=localhost" >> intermediate/openssl.cnf
+  echo -e "DNS.2=$alt_name" >> intermediate/openssl.cnf
 
   # create a csr
   openssl req -config intermediate/openssl.cnf \
@@ -77,13 +88,13 @@ generate_final_certificate () {
              -passin pass:$DEFAULT_PASSWORD \
              -out intermediate/certs/$HOSTNAME.cert.pem
 
-  chmod 444 intermediate/certs/$HOSTNAME.cert.pem
+  #chmod 444 intermediate/certs/$HOSTNAME.cert.pem
 
   # verify the cert
-  openssl x509 -noout -text -in intermediate/certs/$HOSTNAME.cert.pem
+  #openssl x509 -noout -text -in intermediate/certs/$HOSTNAME.cert.pem
 
   # verify the chain trust
-  openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/$HOSTNAME.cert.pem
+  #openssl verify -CAfile intermediate/certs/ca-chain.cert.pem intermediate/certs/$HOSTNAME.cert.pem
 }
 
 create_certificate_revokation_list () {

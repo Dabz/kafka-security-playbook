@@ -7,8 +7,9 @@
 #EXTENSION="usr_cert"
 
 HOSTNAME=$1
-EXTENSION=$2
-DEFAULT_PASSWORD=${3:-confluent}
+MACHINE=$2
+EXTENSION=$3
+DEFAULT_PASSWORD=${4:-confluent}
 
 echo "Building a part of certificates for $HOSTNAME using $EXTENSION"
 
@@ -17,6 +18,10 @@ then
 CA_ROOT_DIR='.'
 fi
 
+ITERMEDIATE_CA_DIR=$CA_ROOT_DIR/ca/intermediate
+
+
 source $CA_ROOT_DIR/utils/functions.sh
 
-(cd $CA_ROOT_DIR/ca; generate_final_certificate )
+(cd $CA_ROOT_DIR; refresh_openssl_file "$CA_ROOT_DIR" "$ITERMEDIATE_CA_DIR" )
+(cd $CA_ROOT_DIR/ca; generate_final_certificate "$MACHINE" )
