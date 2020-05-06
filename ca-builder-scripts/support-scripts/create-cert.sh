@@ -1,4 +1,4 @@
-#!/usr/bin/expect
+#!/usr/bin/expect -f
 
 proc slurp {file} {
     set fh [open $file r]
@@ -8,7 +8,7 @@ proc slurp {file} {
 }
 
 proc create_certs {cert_name,machine} {
-  eval spawn ./create-pair-certs.sh $cert_name $machine server_cert
+  eval spawn ./create-pair-certs.sh $cert_name $machine
 }
 
 set timeout 20
@@ -23,7 +23,7 @@ set ORGANIZATION [lrange $lines 3 3]
 set cert_name [lindex $argv 0]
 set machine [lrange $argv 1 end]
 
-eval spawn ./create-pair-certs.sh $cert_name $machine server_cert
+spawn ./create-pair-certs.sh $cert_name $machine
 
 ## Generating the data for the CA setup.
 expect "Country Name (2 letter code)"
@@ -43,6 +43,6 @@ send "\r";
 # Sign the certificate and commit
 expect "Sign the certificate?"
 send "y\r";
-expect "1 out of 1 certificate requests certified, commit?"
+expect "1 out of 1 certificate requests certified, commit"
 send "y\r";
-#interact
+interact

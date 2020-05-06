@@ -1,0 +1,4 @@
+consumer,machine0.example.com
+producer,machine1.example.com
+kafka,machine2.example.com
+zookeeper,machine3.example.com
