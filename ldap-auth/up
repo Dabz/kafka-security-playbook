@@ -1,0 +1,14 @@
+#!/bin/sh
+
+## start docker-compose up to and including kafka
+docker-compose up -d --build 
+
+echo "Example configuration:"
+echo "Should succeed (barnie is in group)"
+echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --topic test-topic --producer.config=/etc/kafka/barnie.properties"
+echo "Should fail (charlie is NOT in group)"
+echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --topic test-topic --producer.config=/etc/kafka/charlie.properties"
+echo "Should succeed (alice is in group)"
+echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config /etc/kafka/alice.properties --topic test-topic --from-beginning"
+echo "List ACLs"
+echo "-> docker-compose exec  kafka kafka-acls --bootstrap-server kafka:9093 --list --command-config /etc/kafka/kafka.properties"

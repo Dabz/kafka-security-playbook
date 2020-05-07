@@ -1,0 +1,8 @@
+dn: ou=users,dc=confluent,dc=io
+objectClass: organizationalUnit
+ou: Users
+
+dn: ou=groups,dc=confluent,dc=io
+objectClass: organizationalUnit
+ou: Groups
+

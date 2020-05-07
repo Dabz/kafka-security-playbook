@@ -1,0 +1,62 @@
+version: '3'
+services:
+    ldap:
+        image: osixia/openldap:1.3.0
+        hostname: ldap
+        container_name: ldap
+        environment:
+            LDAP_ORGANISATION: "Confluent"
+            LDAP_DOMAIN: "confluent.io"
+        ports:
+            - "389:389"
+            - "636:636"
+        volumes:
+            - "$PWD/ldap/custom:/container/service/slapd/assets/config/bootstrap/ldif/custom"
+        command: "--copy-service"
+
+    phpldapadmin-service:
+        image: osixia/phpldapadmin:0.9.0
+        container_name: ldapadmin-service
+        environment:
+          - PHPLDAPADMIN_LDAP_HOSTS=ldap
+        ports:
+          - "6444:443"
+        depends_on:
+          - ldap
+
+    zookeeper:
+        build: zookeeper/
+        hostname: zookeeper
+        container_name: zookeeper
+        environment:
+          - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf
+
+    kafka:
+        build: kafka/
+        container_name: kafka
+        environment:
+            - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf
+        depends_on:
+            - zookeeper
+            - ldap
+        volumes:
+            - "$PWD/kafka/users:/service/kafka/users"
+            - "$PWD/kafka/jks:/etc/kafka/jks"
+        ports:
+            - "9093:9093"
+        command: ["kafka-server-start", "/etc/kafka/server.properties"]
+
+    kafka-security-manager:
+        image: simplesteph/kafka-security-manager:latest
+        hostname: kafka-security-manager
+        container_name: kafka-security-manager
+        environment:
+            - AUTHORIZER_ZOOKEEPER_CONNECT=zookeeper:2181
+            - KSM_READONLY=false
+            - SOURCE_CLASS=com.github.simplesteph.ksm.source.FileSourceAcl
+            - SOURCE_FILE_FILENAME=/acls/acls.csv
+        depends_on:
+            - kafka
+        volumes:
+            - "$PWD/acls:/acls"
+
