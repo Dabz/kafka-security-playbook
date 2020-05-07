@@ -9,7 +9,7 @@ RUN yum clean all
 
 # 2. Install confluent kafka tools:
 RUN yum install -y java-11-openjdk
-RUN yum install -y confluent-kafka-2.12
+RUN yum install -y confluent-platform-2.12
 
 # 3. Install Kerberos libaries
 RUN yum install -y krb5-workstation krb5-libs
@@ -18,6 +18,7 @@ RUN yum install -y krb5-workstation krb5-libs
 COPY consumer.properties /etc/kafka/consumer.properties
 COPY producer.properties /etc/kafka/producer.properties
 COPY command.properties /etc/kafka/command.properties
+COPY scram.properties /etc/kafka/scram.properties
 COPY client.sasl.jaas.config /etc/kafka/client_jaas.conf
 
 ENV KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf
