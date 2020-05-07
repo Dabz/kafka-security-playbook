@@ -1,7 +1,7 @@
 version: '3.4'
 services:
     ldap:
-        image: osixia/openldap:1.2.3
+        image: osixia/openldap:1.3.0
         hostname: ldap
         container_name: ldap
         environment:
@@ -334,6 +334,62 @@ services:
                                                                             password="eva-secret" \
                                                                             metadataServerUrls="http://kafka:8090";
 
+    ksqldb-server:
+        image: ${REPOSITORY}/cp-ksqldb-server:${TAG}
+        hostname: ksqldb-server
+        container_name: ksqldb-server
+        depends_on:
+            - kafka
+            - schema-registry
+        ports:
+          - "8088:8088"
+        volumes:
+          - ./conf:/tmp/conf
+        healthcheck:
+          disable: true
+        environment:
+          # CUB_CLASSPATH: '/usr/share/java/ksqldb-server/*:/usr/share/java/cp-base-new/*'
+          CUB_CLASSPATH: '/usr/share/java/ksqldb-server/*:/usr/share/java/cp-base-new/*'
+          KSQL_LOG4J_ROOT_LOGLEVEL: TRACE
+          KSQL_BOOTSTRAP_SERVERS: "kafka:9092"
+          KSQL_HOST_NAME: ksqldb-server
+          KSQL_LISTENERS: "http://0.0.0.0:8088"
+          KSQL_CACHE_MAX_BYTES_BUFFERING: 0
+          KSQL_KSQL_CONNECT_URL: "http://connect:8083"
+
+          # enable rbac confluent security plugin
+          KSQL_KSQL_SECURITY_EXTENSION_CLASS: io.confluent.ksql.security.KsqlConfluentSecurityExtension
+
+          # Enable KSQL OAuth authentication
+          KSQL_REST_SERVLET_INITIALIZOR_CLASSES: io.confluent.common.security.jetty.initializer.InstallBearerOrBasicSecurityHandler
+          KSQL_WEBSOCKET_SERVLET_INITIALIZOR_CLASSES: io.confluent.common.security.jetty.initializer.InstallBearerOrBasicSecurityHandler
+          KSQL_OAUTH_JWT_PUBLIC_KEY_PATH: /tmp/conf/public.pem
+          KSQL_CONFLUENT_METADATA_PUBLIC_KEY_PATH: /tmp/conf/public.pem
+          KSQL_PUBLIC_KEY_PATH: /tmp/conf/public.pem
+
+          # How to connect to MDS
+          KSQL_CONFLUENT_METADATA_BOOTSTRAP_SERVER_URLS: http://kafka:8090
+          KSQL_CONFLUENT_METADATA_HTTP_AUTH_CREDENTIALS_PROVIDER: BASIC
+          KSQL_CONFLUENT_METADATA_BASIC_AUTH_CREDENTIALS_PROVIDER: USER_INFO
+          KSQL_CONFLUENT_METADATA_BASIC_AUTH_USER_INFO: fritz:fritz-secret
+
+          # Credentials for kafka access
+          KSQL_SECURITY_PROTOCOL: SASL_PLAINTEXT
+          KSQL_SASL_MECHANISM: OAUTHBEARER
+          KSQL_SASL_JAAS_CONFIG: |
+                                  \
+                                  org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+                                  username="fritz" \
+                                  password="fritz-secret" \
+                                  metadataServerUrls="http://kafka:8090";
+          KSQL_SASL_LOGIN_CALLBACK_HANDLER_CLASS: io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler
+
+          KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+          KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_CREDENTIALS_SOURCE: USER_INFO
+          KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: fritz:fritz-secret
+          # KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
+          # KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+
     control-center:
       image: ${REPOSITORY}/cp-enterprise-control-center:${TAG}
       hostname: control-center
@@ -341,6 +397,7 @@ services:
       depends_on:
         - 'zookeeper'
         - 'kafka'
+        - 'ksqldb-server'
         - 'connect'
       ports:
         - "9021:9021"
@@ -362,6 +419,10 @@ services:
         # ========================= other services ==============================
         # connect
         CONTROL_CENTER_CONNECT_CONNECT1_CLUSTER: http://connect:8083
+
+        # ksql
+        CONTROL_CENTER_KSQL_KSQL1_URL: http://ksqldb-server:8088
+        CONTROL_CENTER_KSQL_KSQL1_ADVERTISED_URL: http://localhost:8088 # access KSQL from the browser
         # schema-registry
         CONTROL_CENTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
 
