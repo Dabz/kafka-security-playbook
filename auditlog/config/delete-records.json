@@ -1,0 +1,10 @@
+{
+    "partitions": [
+        {
+            "topic": "bar",
+            "partition": 0,
+            "offset": 3
+        }
+    ],
+    "version": 1
+}
