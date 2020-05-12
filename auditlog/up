@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+docker-compose up -d
+
+docker-compose exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=kafka],SCRAM-SHA-512=[password=kafka]' --entity-type users --entity-name kafka
+docker-compose exec zookeeper kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=consumerpass],SCRAM-SHA-512=[password=consumerpass]' --entity-type users --entity-name consumer
+docker-compose exec zookeeper kafka-configs --zookeeper zookeeper:2181 --alter --add-config 'SCRAM-SHA-256=[password=producerpass],SCRAM-SHA-512=[password=producerpass]' --entity-type users --entity-name producer
+
+# ACLs
+docker-compose exec kafka kafka-acls --bootstrap-server kafka:9092 --command-config /etc/kafka/kafka-user.properties --add --allow-principal User:producer --producer --topic=*
+docker-compose exec kafka kafka-acls --bootstrap-server kafka:9092 --command-config /etc/kafka/kafka-user.properties --add --allow-principal User:consumer --consumer --topic=* --group=*
+docker-compose exec kafka kafka-acls --bootstrap-server kafka:9092 --command-config /etc/kafka/kafka-user.properties --add --allow-principal User:confluent-audit --producer --topic confluent-audit-log-events --resource-pattern-type prefixed
+
+echo "Example configuration:"
+echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9092 --producer.config /etc/kafka/producer-user.properties --topic test"
+echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --consumer.config /etc/kafka/consumer-user.properties --topic test --from-beginning"
