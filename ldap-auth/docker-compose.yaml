@@ -44,7 +44,6 @@ services:
             - "$PWD/kafka/jks:/etc/kafka/jks"
         ports:
             - "9093:9093"
-        command: ["kafka-server-start", "/etc/kafka/server.properties"]
 
     kafka-security-manager:
         image: simplesteph/kafka-security-manager:latest
