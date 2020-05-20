@@ -41,3 +41,4 @@ services:
         KAFKA_SASL_JAAS_CONFIG:                               org.apache.kafka.common.security.plain.PlainLoginModule required \
                                                               username="admin" \
                                                               password="admin-secret" ;
+        KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
