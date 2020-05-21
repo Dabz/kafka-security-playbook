@@ -45,17 +45,3 @@ services:
         ports:
             - "9093:9093"
 
-    kafka-security-manager:
-        image: simplesteph/kafka-security-manager:latest
-        hostname: kafka-security-manager
-        container_name: kafka-security-manager
-        environment:
-            - AUTHORIZER_ZOOKEEPER_CONNECT=zookeeper:2181
-            - KSM_READONLY=false
-            - SOURCE_CLASS=com.github.simplesteph.ksm.source.FileSourceAcl
-            - SOURCE_FILE_FILENAME=/acls/acls.csv
-        depends_on:
-            - kafka
-        volumes:
-            - "$PWD/acls:/acls"
-
