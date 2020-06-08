@@ -1,0 +1,15 @@
+dn: cn=kafka,ou=users,{{ LDAP_BASE_DN }}
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: kafka
+sn: kafka
+givenName: kafka
+cn: kafka
+displayName: kafka
+uidNumber: 10007
+gidNumber: 5000
+userPassword: kafka
+gecos: kafka
+loginShell: /bin/bash
+homeDirectory: /home/kafka
