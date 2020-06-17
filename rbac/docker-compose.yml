@@ -50,8 +50,6 @@ services:
             - ldap
         ports:
             - "8090:8090"
-            - "9092:9092"
-            - "9093:9093"
             - "9094:9094"
         volumes:
             - ./conf:/tmp/conf
