@@ -5,6 +5,10 @@ services:
     build: zookeeper/
     container_name: zookeeper
     hostname: zookeeper
+    volumes:
+      - ./secrets/:/var/ssl/private
+    environment:
+      KAFKA_JMX_OPTS: " -Dcom.sun.management.config.file=/var/ssl/private/jmxremote.properties"
 
   kafka:
     build: kafka/

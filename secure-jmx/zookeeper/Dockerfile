@@ -15,5 +15,6 @@ RUN yum install -y confluent-platform-2.12
 COPY zookeeper.properties /etc/kafka/zookeeper.properties
 
 EXPOSE 2181
+EXPOSE 9998
 
 CMD zookeeper-server-start /etc/kafka/zookeeper.properties
