@@ -26,6 +26,18 @@ services:
         depends_on:
           - ldap
 
+    tools:
+      image: cnfltraining/training-tools:5.5
+      hostname: tools
+      container_name: tools
+      depends_on:
+        - zookeeper
+        - kafka
+      volumes:
+        - .:/tmp/
+      entrypoint: /bin/bash
+      tty: true
+
     zookeeper:
         image: ${REPOSITORY}/cp-zookeeper:${TAG}
         hostname: zookeeper
