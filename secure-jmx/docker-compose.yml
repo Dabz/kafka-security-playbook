@@ -1,0 +1,22 @@
+version: '3'
+services:
+
+  zookeeper:
+    build: zookeeper/
+    container_name: zookeeper
+    hostname: zookeeper
+    volumes:
+      - ./secrets/:/var/ssl/private
+    environment:
+      KAFKA_JMX_OPTS: " -Dcom.sun.management.config.file=/var/ssl/private/jmxremote.properties"
+
+  kafka:
+    build: kafka/
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    volumes:
+      - ./secrets/:/var/ssl/private
+    environment:
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.config.file=/var/ssl/private/jmxremote.properties"
+      #KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.rmi.port=9999 -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
