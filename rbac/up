@@ -2,6 +2,7 @@
 
 ## start docker-compose up to and including kafka
 docker-compose up -d kafka
+docker-compose up -d tools
 
 # wait for kafka container to be healthy
 source ./functions.sh
