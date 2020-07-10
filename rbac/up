@@ -2,6 +2,7 @@
 
 ## start docker-compose up to and including kafka
 docker-compose up -d kafka
+docker-compose up -d tools
 
 # wait for kafka container to be healthy
 source ./functions.sh
@@ -10,7 +11,8 @@ echo "Waiting for the broker to be healthy"
 retry 10 5 container_healthy kafka
 
 # Create the roles
-./create-role-bindings.sh
+echo "Creating role bindings for principals"
+docker-compose exec tools bash -c "/tmp/create-role-bindings.sh" || exit 1
 
 ## start remaining services
 
