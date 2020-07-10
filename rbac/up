@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ## start docker-compose up to and including kafka
 docker-compose up -d kafka
