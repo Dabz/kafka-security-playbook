@@ -19,6 +19,6 @@ COPY kafka.sasl.jaas.config /etc/kafka/kafka_server_jaas.conf
 
 EXPOSE 9093
 
-ENV KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf
+ENV KAFKA_OPTS="-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dzookeeper.sasl.client.username=zkservice"
 
 CMD kafka-server-start /etc/kafka/server.properties
