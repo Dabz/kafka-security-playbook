@@ -219,7 +219,7 @@ services:
           retries: 15
           start_period: 30s
       environment:
-        CUB_CLASSPATH: '/etc/confluent/docker/docker-utils.jar:/usr/share/java/confluent-security/schema-registry/*:/usr/share/java/schema-registry/*'
+        CUB_CLASSPATH: '/usr/share/java/confluent-security/schema-registry/*:/usr/share/java/schema-registry/*:/usr/share/java/cp-base-new/*'
         SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
         SCHEMA_REGISTRY_HOST_NAME: schema-registry
         # This is only needed if you don't have a license and would like to test as part of a trial period
@@ -268,7 +268,7 @@ services:
           retries: 20
           start_period: 30s
       environment:
-        CUB_CLASSPATH: '/etc/confluent/docker/docker-utils.jar:/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*'
+        CUB_CLASSPATH: '/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*:/usr/share/java/cp-base-new/*'
         # we can run without zookeeper connect in local environment
         # CONNECT_ZOOKEEPER_CONNECT: 'zookeeper:2181'
 
@@ -357,8 +357,7 @@ services:
         healthcheck:
           disable: true
         environment:
-          # CUB_CLASSPATH: '/usr/share/java/ksqldb-server/*:/usr/share/java/cp-base-new/*'
-          CUB_CLASSPATH: '/usr/share/java/ksqldb-server/*:/usr/share/java/cp-base-new/*'
+          CUB_CLASSPATH: '/usr/share/java/confluent-security/ksql/*:/usr/share/java/ksqldb-server/*:/usr/share/java/cp-base-new/*'
           KSQL_LOG4J_ROOT_LOGLEVEL: TRACE
           KSQL_BOOTSTRAP_SERVERS: "kafka:9092"
           KSQL_HOST_NAME: ksqldb-server
@@ -370,10 +369,11 @@ services:
           KSQL_KSQL_SECURITY_EXTENSION_CLASS: io.confluent.ksql.security.KsqlConfluentSecurityExtension
 
           # Enable KSQL OAuth authentication
-          KSQL_REST_SERVLET_INITIALIZOR_CLASSES: io.confluent.common.security.jetty.initializer.InstallBearerOrBasicSecurityHandler
-          KSQL_WEBSOCKET_SERVLET_INITIALIZOR_CLASSES: io.confluent.common.security.jetty.initializer.InstallBearerOrBasicSecurityHandler
-          KSQL_OAUTH_JWT_PUBLIC_KEY_PATH: /tmp/conf/public.pem
-          KSQL_CONFLUENT_METADATA_PUBLIC_KEY_PATH: /tmp/conf/public.pem
+          # KSQL_REST_SERVLET_INITIALIZOR_CLASSES: io.confluent.common.security.jetty.initializer.InstallBearerOrBasicSecurityHandler
+          # KSQL_WEBSOCKET_SERVLET_INITIALIZOR_CLASSES: io.confluent.common.security.jetty.initializer.InstallBearerOrBasicSecurityHandler
+          # KSQL_OAUTH_JWT_PUBLIC_KEY_PATH: /tmp/conf/public.pem
+          # KSQL_CONFLUENT_METADATA_PUBLIC_KEY_PATH: /tmp/conf/public.pem
+          KSQL_KSQL_AUTHENTICATION_PLUGIN_CLASS: io.confluent.ksql.security.VertxBearerOrBasicAuthenticationPlugin
           KSQL_PUBLIC_KEY_PATH: /tmp/conf/public.pem
 
           # How to connect to MDS
@@ -414,8 +414,7 @@ services:
         - ./conf:/tmp/conf
       environment:
         # CUB CLASSPATH
-        CUB_CLASSPATH: '/etc/confluent/docker/docker-utils.jar:/usr/share/java/confluent-control-center/*:/usr/share/java/rest-utils/*:/usr/share/java/confluent-common/*'
-        # CUB_CLASSPATH: '/etc/confluent/docker/docker-utils.jar:/usr/share/java/confluent-control-center/*'
+        CUB_CLASSPATH: '/usr/share/java/confluent-control-center/*:/usr/share/java/rest-utils/*:/usr/share/java/confluent-common/*:/usr/share/java/confluent-security/kafka-rest/*:/usr/share/java/kafka-rest/:/usr/share/java/cp-base-new/*'
         # general settings
         CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka:9092'
         CONTROL_CENTER_ZOOKEEPER_CONNECT: 'zookeeper:2181'
