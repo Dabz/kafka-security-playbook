@@ -3,12 +3,12 @@ MAINTAINER d.gasparina@gmail.com
 ENV container docker
 
 # 1. Adding Confluent repository
-RUN rpm --import https://packages.confluent.io/rpm/5.4/archive.key
+RUN rpm --import https://packages.confluent.io/rpm/6.0/archive.key
 COPY confluent.repo /etc/yum.repos.d/confluent.repo
 RUN yum clean all
 
 # 2. Install zookeeper and kafka
-RUN yum install -y java-1.8.0-openjdk
+RUN yum install -y java-11-openjdk
 RUN yum install -y confluent-schema-registry confluent-security
 
 # 3. Configure Kafka 
