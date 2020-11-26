@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 services:
   kdc:
     hostname: kdc
@@ -7,7 +7,6 @@ services:
     container_name: kdc
     volumes:
       - secret:/var/lib/secret
-      - ./kdc/krb5.conf:/etc/kdc/krb5.conf
 
   zookeeper:
     build: zookeeper/
@@ -19,11 +18,12 @@ services:
     # Required to wait for the keytab to get generated
     restart: on-failure
     environment:
-        - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf -Dsun.security.krb5.debug=true
+        - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf -Dsun.security.krb5.debug=true -Djava.security.krb5.conf=/tmp/krb5.conf
+        - KRB5_CONFIG=/tmp/krb5.conf
         #- KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf
     volumes:
       - secret:/var/lib/secret
-      - ./kdc/krb5.conf:/etc/krb5.conf
+      - ./kdc/krb5.conf:/tmp/krb5.conf
 
   kafka:
     build: kafka/
@@ -31,8 +31,9 @@ services:
     hostname: kafka
     domainname: kerberos-multi-node_default
     environment:
-        # - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dsun.security.krb5.debug=true -Dzookeeper.sasl.client.username=zookeeper1
-      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dzookeeper.sasl.client.username=zookeeper1
+        # - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dsun.security.krb5.debug=true -Dzookeeper.sasl.client.username=zkservice
+        - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dzookeeper.sasl.client.username=zkservice -Djava.security.krb5.conf=/tmp/krb5.conf
+        - KRB5_CONFIG=/tmp/krb5.conf
     depends_on: 
       - zookeeper
       - kdc
@@ -40,7 +41,7 @@ services:
     restart: on-failure
     volumes:
       - secret:/var/lib/secret
-      - ./kdc/krb5.conf:/etc/krb5.conf
+      - ./kdc/krb5.conf:/tmp/krb5.conf
 
   kafka1:
     build: kafka1/
@@ -48,8 +49,9 @@ services:
     hostname: kafka1
     domainname: kerberos-multi-node_default
     environment:
-        # - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dsun.security.krb5.debug=true -Dzookeeper.sasl.client.username=zookeeper1
-      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dzookeeper.sasl.client.username=zookeeper1
+        # - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dsun.security.krb5.debug=true -Dzookeeper.sasl.client.username=zkservice
+      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dzookeeper.sasl.client.username=zkservice -Djava.security.krb5.conf=/tmp/krb5.conf
+      - KRB5_CONFIG=/tmp/krb5.conf
     depends_on: 
       - zookeeper
       - kdc
@@ -57,7 +59,7 @@ services:
     restart: on-failure
     volumes:
       - secret:/var/lib/secret
-      - ./kdc/krb5.conf:/etc/krb5.conf
+      - ./kdc/krb5.conf:/tmp/krb5.conf
 
 volumes:
   secret: {}
