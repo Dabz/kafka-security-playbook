@@ -9,7 +9,7 @@ RUN yum clean all
 
 # 2. Install zookeeper and kafka
 RUN yum install -y java-11-openjdk
-RUN yum install -y confluent-platform
+RUN yum install -y confluent-platform-2.12
 RUN yum install -y confluent-control-center
 
 # 3. Configure Kafka for Kerberos 

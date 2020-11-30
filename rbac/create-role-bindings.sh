@@ -16,6 +16,7 @@ CONNECT=connect-cluster
 SR=schema-registry
 KSQL=default_
 C3=c3-cluster
+LICENSE_RESOURCE="Topic:_confluent-license"
 
 SUPER_USER=alice
 SUPER_USER_PASSWORD=alice-secret
@@ -24,6 +25,7 @@ CONNECT_PRINCIPAL="User:eva"
 SR_PRINCIPAL="User:barnie"
 KSQL_PRINCIPAL="User:fritz"
 C3_PRINCIPAL="User:charlie"
+REST_ADMIN="User:donald"
 
 # Log into MDS
 if [[ $(type expect 2>&1) =~ "not found" ]]; then
@@ -95,6 +97,15 @@ do
         --kafka-cluster-id $KAFKA_CLUSTER_ID
 done
 
+for role in DeveloperRead DeveloperWrite
+do
+    confluent iam rolebinding create \
+        --principal $SR_PRINCIPAL \
+        --role $role \
+        --resource $LICENSE_RESOURCE \
+        --kafka-cluster-id $KAFKA_CLUSTER_ID
+done
+
 ################################### CONNECT ###################################
 echo "Creating Connect role bindings"
 
@@ -161,6 +172,16 @@ confluent iam rolebinding create \
     --role SystemAdmin \
     --kafka-cluster-id $KAFKA_CLUSTER_ID
 
+############################## Rest Proxy ###############################
+echo "Creating role bindings for Rest Proxy"
+for role in DeveloperRead DeveloperWrite
+do
+    confluent iam rolebinding create \
+    --principal $REST_ADMIN \
+    --role $role \
+    --resource $LICENSE_RESOURCE \
+    --kafka-cluster-id $KAFKA_CLUSTER_ID
+done
 
 ######################### print cluster ids and users again to make it easier to copypaste ###########
 
