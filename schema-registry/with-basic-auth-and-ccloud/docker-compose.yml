@@ -26,6 +26,10 @@ services:
       SCHEMA_REGISTRY_AUTHENTICATION_REALM: "Schema"
       SCHEMA_REGISTRY_OPTS: "-Djava.security.auth.login.config=/tmp/jaas_config.file"
       SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_AUTH_MECHANISM: "JETTY_AUTH"
+      #Uncomment the following 2 lines to add anonymous Support
+      #SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_ANONYMOUS_PRINCIPAL: "true"
+      #SCHEMA_REGISTRY_AUTHENTICATION_SKIP_PATHS: "/*"
+      
     volumes:
       - ./jaas_config.file:/tmp/jaas_config.file
       - ./password-file:/tmp/password-file
