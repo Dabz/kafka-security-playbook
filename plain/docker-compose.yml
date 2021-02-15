@@ -1,15 +1,44 @@
-version: '3'
+version: '3.4'
 services:
 
   zookeeper:
-    build: zookeeper/
+    image: ${REPOSITORY}/cp-zookeeper:${TAG}
     container_name: zookeeper
     hostname: zookeeper
+    environment:
+        ZOOKEEPER_CLIENT_PORT: 2181
+        ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    build: kafka/
+    image: ${REPOSITORY}/cp-kafka:${TAG}
     container_name: kafka
+    hostname: kafka
+    depends_on:
+        - zookeeper
+    ports:
+        - 9093:9093
     environment:
-      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf 
-    depends_on: 
-      - zookeeper
+        KAFKA_BROKER_ID: 1
+        KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+        KAFKA_LISTENER: INTERNAL://kafka:9092,OUTSIDE://localhost:9093
+        KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://localhost:9093
+        KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:SASL_PLAINTEXT,OUTSIDE:SASL_PLAINTEXT
+        KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+        KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+        KAFKA_LISTENER_NAME_INTERNAL_SASL_ENABLED_MECHANISMS: PLAIN
+        KAFKA_LISTENER_NAME_OUTSIDE_SASL_ENABLED_MECHANISMS: PLAIN
+
+        KAFKA_LISTENER_NAME_INTERNAL_PLAIN_SASL_JAAS_CONFIG:    org.apache.kafka.common.security.plain.PlainLoginModule required \
+                                                              username="admin" \
+                                                              password="admin-secret" \
+                                                              user_admin="admin-secret" ;
+        KAFKA_LISTENER_NAME_OUTSIDE_PLAIN_SASL_JAAS_CONFIG:   org.apache.kafka.common.security.plain.PlainLoginModule required \
+                                                              username="admin" \
+                                                              password="admin-secret" \
+                                                              user_admin="admin-secret" \
+                                                              user_producer="producer-secret" \
+                                                              user_consumer="consumer-secret" ;
+        KAFKA_SASL_JAAS_CONFIG:                               org.apache.kafka.common.security.plain.PlainLoginModule required \
+                                                              username="admin" \
+                                                              password="admin-secret" ;
+        KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
