@@ -12,6 +12,7 @@ services:
       KAFKA_OPTS: -Djava.security.auth.login.config=/tmp/zookeeper.sasl.jaas.config
     volumes:
         - $PWD/zookeeper.sasl.jaas.config:/tmp/zookeeper.sasl.jaas.config
+        - $PWD/jline-2.14.6.jar:/usr/share/java/kafka/jline-2.14.6.jar
 
   kafka:
     image: ${REPOSITORY}/cp-kafka:${TAG}
@@ -21,7 +22,7 @@ services:
         - "9093:9093"
     environment:
         KAFKA_OPTS: -Djava.security.auth.login.config=/tmp/kafka.sasl.jaas.config
-        KAFKA_SUPER_USERS: User:admin,User:kafka
+        KAFKA_SUPER_USERS: User:admin;User:kafka
         KAFKA_BROKER_ID: 1
         KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
         KAFKA_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://localhost:9093
@@ -32,10 +33,10 @@ services:
         KAFKA_LISTENER_NAME_INTERNAL_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256
         KAFKA_LISTENER_NAME_OUTSIDE_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256
 
-        KAFKA_LISTENER_NAME_INTERNAL_SCRAM__SHA__256_SASL_JAAS_CONFIG:    org.apache.kafka.common.security.scram.ScramLoginModule required \
+        KAFKA_LISTENER_NAME_INTERNAL_SCRAM___SHA___256_SASL_JAAS_CONFIG:    org.apache.kafka.common.security.scram.ScramLoginModule required \
                                                               username="admin" \
                                                               password="admin-secret" ;
-        KAFKA_LISTENER_NAME_OUTSIDE_SCRAM__SHA__256_SASL_JAAS_CONFIG:   org.apache.kafka.common.security.scram.ScramLoginModule required \
+        KAFKA_LISTENER_NAME_OUTSIDE_SCRAM___SHA___256_SASL_JAAS_CONFIG:   org.apache.kafka.common.security.scram.ScramLoginModule required \
                                                               username="admin" \
                                                               password="admin-secret" ;
         KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1        
