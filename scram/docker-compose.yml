@@ -43,6 +43,7 @@ services:
         KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1        
     volumes:
         - ./kafka.sasl.jaas.config:/tmp/kafka.sasl.jaas.config
+        - ./admin.properties:/tmp/admin.properties
 
     depends_on: 
       - zookeeper
