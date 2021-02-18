@@ -1,8 +1,15 @@
 #!/bin/bash
 
 docker-compose up -d
-# TODO: An ugly sleep to remove with the confluent utility belt at some point
-sleep 5
+
+docker-compose logs schema-registry | grep "Server started, listening for requests"
+while (( $? == 1 ))
+do
+    sleep 1
+    echo "Waiting for schema registry to be started ..."
+    docker-compose logs schema-registry | grep "Server started, listening for requests"
+done
+
 docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p read -o SUBJECT_READ
 docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p write -o SUBJECT_WRITE
 docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p admin -o '*'

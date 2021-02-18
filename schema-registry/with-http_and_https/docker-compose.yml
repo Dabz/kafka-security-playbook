@@ -9,6 +9,8 @@ services:
 
   kafka:
     image: ${REPOSITORY}/cp-enterprise-kafka:${TAG}
+    hostname: kafka
+    container_name: kafka
     depends_on:
       - zookeeper
     ports:
