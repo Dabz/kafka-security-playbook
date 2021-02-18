@@ -1,0 +1,13 @@
+#!/bin/bash
+
+docker-compose up -d
+# TODO: An ugly sleep to remove with the confluent utility belt at some point
+sleep 5
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p read -o SUBJECT_READ
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p write -o SUBJECT_WRITE
+docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p admin -o '*'
+
+# Uncomment the below 2 lines for anonymous support
+#docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -p 'ANONYMOUS' -o GLOBAL_READ
+#docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -p 'ANONYMOUS' -o GLOBAL_COMPATIBILITY_READ
+#docker-compose exec schema-registry sr-acl-cli --config /etc/schema-registry/schema-registry.properties --add -s '*' -p 'ANONYMOUS' -o SUBJECT_READ
