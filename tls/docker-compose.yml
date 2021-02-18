@@ -1,55 +1,53 @@
-version: '3'
+version: '3.8'
+
 services:
-  zookeeper:
-    build: zookeeper/
-    container_name: zookeeper
-    hostname: zookeeper
-    domainname: confluent.local
-    restart: on-failure
-    volumes:
-      - ./certs/:/var/lib/secret
-    networks:
-      default:
-        aliases:
-          - zookeeper.confluent.local
+    zookeeper:
+        image: ${REPOSITORY}/cp-zookeeper:${TAG}
+        hostname: zookeeper
+        container_name: zookeeper
+        domainname: confluent.local
+        environment:
+            ZOOKEEPER_CLIENT_PORT: 2181
+            ZOOKEEPER_TICK_TIME: 2000
+        volumes:
+            - ./certs/:/var/lib/secret
 
+    kafka:
+        build: kafka/
+        container_name: kafka
+        hostname: kafka
+        domainname: confluent.local
+        depends_on: 
+            - zookeeper
+        restart: on-failure
+        volumes:
+            - ./certs/:/var/lib/secret
+        networks:
+            default:
+                aliases:
+                    - kafka.confluent.local
+        ports:
+            - "9093:9093"
+        environment:
+            SCHEMA_REGISTRY_OPTS: '-Djavax.net.ssl.keyStore=/var/lib/secret/client.keystore.jks -Djavax.net.ssl.trustStore=/var/lib/secret/truststore.jks -Djavax.net.ssl.keyStorePassword=test1234 -Djavax.net.ssl.trustStorePassword=test1234'
 
-  kafka:
-    build: kafka/
-    container_name: kafka
-    hostname: kafka
-    domainname: confluent.local
-    depends_on: 
-      - zookeeper
-    restart: on-failure
-    volumes:
-      - ./certs/:/var/lib/secret
-    networks:
-      default:
-        aliases:
-          - kafka.confluent.local
-    ports:
-      - "9093:9093"
-    environment:
-      SCHEMA_REGISTRY_OPTS: '-Djavax.net.ssl.keyStore=/var/lib/secret/client.keystore.jks -Djavax.net.ssl.trustStore=/var/lib/secret/truststore.jks -Djavax.net.ssl.keyStorePassword=test1234 -Djavax.net.ssl.trustStorePassword=test1234'
-
-  schema-registry:
-    build: schema-registry/
-    container_name: schema-registry
-    hostname: schema-registry
-    domainname: confluent.local
-    depends_on: 
-      - kafka
-    restart: on-failure
-    volumes:
-      - ./certs/:/var/lib/secret
-      - ./schema-registry/schema-registry.properties:/etc/schema-registry/schema-registry.properties
-    networks:
-      default:
-        aliases:
-          - schema-registry.confluent.local
-    ports:
-      - "8443:8443"
+    schema-registry:
+        build: schema-registry/
+        container_name: schema-registry
+        hostname: schema-registry
+        domainname: confluent.local
+        depends_on: 
+            - kafka
+        restart: on-failure
+        volumes:
+            - ./certs/:/var/lib/secret
+            - ./schema-registry/schema-registry.properties:/etc/schema-registry/schema-registry.properties
+        networks:
+            default:
+                aliases:
+                    - schema-registry.confluent.local
+        ports:
+            - "8443:8443"
 
 volumes:
   secret: {}
