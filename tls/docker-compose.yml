@@ -10,26 +10,56 @@ services:
             ZOOKEEPER_CLIENT_PORT: 2181
             ZOOKEEPER_TICK_TIME: 2000
         volumes:
-            - ./certs/:/var/lib/secret
+            - ./certs/:/etc/kafka/secrets
 
     kafka:
-        build: kafka/
+        # image: ${REPOSITORY}/cp-kafka:${TAG}
+        image: ${REPOSITORY}/cp-server:${TAG}
         container_name: kafka
         hostname: kafka
         domainname: confluent.local
         depends_on: 
             - zookeeper
-        restart: on-failure
         volumes:
-            - ./certs/:/var/lib/secret
-        networks:
-            default:
-                aliases:
-                    - kafka.confluent.local
+            - ./certs/:/etc/kafka/secrets
+            - ./client.properties:/tmp/client.properties
+
         ports:
             - "9093:9093"
+
         environment:
             SCHEMA_REGISTRY_OPTS: '-Djavax.net.ssl.keyStore=/var/lib/secret/client.keystore.jks -Djavax.net.ssl.trustStore=/var/lib/secret/truststore.jks -Djavax.net.ssl.keyStorePassword=test1234 -Djavax.net.ssl.trustStorePassword=test1234'
+            KAFKA_BROKER_ID: 1
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+            KAFKA_SUPER_USERS: User:CN=kafka.confluent.local,L=London,O=Confluent,C=UK;User:CN=schema-registry.confluent.local,L=London,O=Confluent,C=UK
+            KAFKA_LISTENERS: SSL://:9093
+            KAFKA_ADVERTISED_LISTENERS: SSL://kafka.confluent.local:9093
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+            KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+            KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+            KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+            KAFKA_REPLICATION_FACTOR: 1
+
+            KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SSL
+
+            KAFKA_SSL_TRUSTSTORE_FILENAME: truststore.jks
+            KAFKA_SSL_TRUSTSTORE_CREDENTIALS: credentials
+            KAFKA_SSL_KEYSTORE_FILENAME: server.keystore.jks
+            KAFKA_SSL_KEYSTORE_CREDENTIALS: credentials
+            KAFKA_SSL_KEY_CREDENTIALS: credentials
+            KAFKA_SSL_CLIENT_AUTH: required
+            KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
+
+            KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+            KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka.confluent.local:9093
+            KAFKA_CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SSL
+            KAFKA_CONFLUENT_METRICS_REPORTER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/truststore.jks
+            KAFKA_CONFLUENT_METRICS_REPORTER_SSL_TRUSTSTORE_PASSWORD: test1234
+            KAFKA_CONFLUENT_METRICS_REPORTER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/server.keystore.jks
+            KAFKA_CONFLUENT_METRICS_REPORTER_SSL_KEYSTORE_PASSWORD: test1234
+            KAFKA_CONFLUENT_METRICS_REPORTER_SSL_KEY_PASSWORD: test1234
+
+            KAFKA_CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
 
     schema-registry:
         build: schema-registry/
@@ -48,9 +78,6 @@ services:
                     - schema-registry.confluent.local
         ports:
             - "8443:8443"
-
-volumes:
-  secret: {}
 
 networks:
   default:

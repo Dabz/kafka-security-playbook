@@ -32,6 +32,7 @@ openssl req -new -newkey rsa:2048 -keyout certs/local-client.key -out certs/loca
 openssl x509 -req -days 3650 -in certs/local-client.csr -CA certs/ca.crt -CAkey certs/ca.key -CAcreateserial -out certs/local-client.crt -extfile local-client.cnf -extensions v3_req
 openssl pkcs12 -export -in certs/local-client.crt -inkey certs/local-client.key -chain -CAfile certs/ca.pem -name `hostname` -out certs/local-client.p12 -password pass:test1234
 
+echo test1234 > certs/credentials
 
 # Import server certificate to keystore and CA to truststore
 keytool -importkeystore -deststorepass test1234 -destkeystore certs/server.keystore.jks \
