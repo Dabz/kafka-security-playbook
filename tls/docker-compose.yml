@@ -34,7 +34,7 @@ services:
             aliases:
                 - kafka.confluent.local
         environment:
-            SCHEMA_REGISTRY_OPTS: '-Djavax.net.ssl.keyStore=/etc/kafka/secrets/client.keystore.jks -Djavax.net.ssl.trustStore=/etc/kafka/secrets/truststore.jks -Djavax.net.ssl.keyStorePassword=test1234 -Djavax.net.ssl.trustStorePassword=test1234'
+            #            SCHEMA_REGISTRY_OPTS: '-Djavax.net.ssl.keyStore=/etc/kafka/secrets/client.keystore.jks -Djavax.net.ssl.trustStore=/etc/kafka/secrets/truststore.jks -Djavax.net.ssl.keyStorePassword=test1234 -Djavax.net.ssl.trustStorePassword=test1234'
             KAFKA_BROKER_ID: 1
             KAFKA_ZOOKEEPER_CONNECT: zookeeper.confluent.local:2181
             KAFKA_SUPER_USERS: User:CN=kafka.confluent.local,L=London,O=Confluent,C=UK;User:CN=schema-registry.confluent.local,L=London,O=Confluent,C=UK
@@ -67,39 +67,39 @@ services:
 
             KAFKA_CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
 
-    schema-registry:
-        image: ${REPOSITORY}/cp-schema-registry:${TAG}
-        container_name: schema-registry
-        hostname: schema-registry
-        domainname: confluent.local
-        depends_on: 
-            - kafka
-        restart: on-failure
-        volumes:
-          - ./certs/:/etc/kafka/secrets
-          - ./client.properties:/tmp/client.properties
-        environment:
-          SCHEMA_REGISTRY_HOST_NAME: schema-registry.confluent.local
-          SCHEMA_REGISTRY_LISTENERS: https://0.0.0.0:8443
-          SCHEMA_REGISTRY_INTER_INSTANCE_PROTOCOL: https
-          SCHEMA_REGISTRY_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/schema-registry-client.keystore.jks
-          SCHEMA_REGISTRY_SSL_KEYSTORE_PASSWORD: test1234
-          SCHEMA_REGISTRY_SSL_KEY_PASSWORD: test1234
-          SCHEMA_REGISTRY_KAFKASTORE_TOPICS: _schemas
-          SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka.confluent.local:9093
-          SCHEMA_REGISTRY_SECURITY_PROTOCOL: SSL
-          SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/truststore.jks
-          SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_PASSWORD: test1234
-
-          SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/schema-registry-client.keystore.jks
-          SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_PASSWORD: test1234
-          SCHEMA_REGISTRY_KAFKASTORE_SSL_KEY_PASSWORD: test1234
-        ports:
-          - "8443:8443"
-        networks:
-            default:
-              aliases:
-                - schema-registry.confluent.local
-
+            #    schema-registry:
+            #        image: ${REPOSITORY}/cp-schema-registry:${TAG}
+            #        container_name: schema-registry
+            #        hostname: schema-registry
+            #        domainname: confluent.local
+            #        depends_on: 
+            #            - kafka
+            #        restart: on-failure
+            #        volumes:
+            #          - ./certs/:/etc/kafka/secrets
+            #          - ./client.properties:/tmp/client.properties
+            #        environment:
+            #          SCHEMA_REGISTRY_HOST_NAME: schema-registry.confluent.local
+            #          SCHEMA_REGISTRY_LISTENERS: https://0.0.0.0:8443
+            #          SCHEMA_REGISTRY_INTER_INSTANCE_PROTOCOL: https
+            #          SCHEMA_REGISTRY_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/schema-registry-client.keystore.jks
+            #          SCHEMA_REGISTRY_SSL_KEYSTORE_PASSWORD: test1234
+            #          SCHEMA_REGISTRY_SSL_KEY_PASSWORD: test1234
+            #          SCHEMA_REGISTRY_KAFKASTORE_TOPICS: _schemas
+            #          SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka.confluent.local:9093
+            #          SCHEMA_REGISTRY_SECURITY_PROTOCOL: SSL
+            #          SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/truststore.jks
+            #          SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_PASSWORD: test1234
+            #
+            #          SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/schema-registry-client.keystore.jks
+            #          SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_PASSWORD: test1234
+            #          SCHEMA_REGISTRY_KAFKASTORE_SSL_KEY_PASSWORD: test1234
+            #        ports:
+            #          - "8443:8443"
+            #        networks:
+            #            default:
+            #              aliases:
+            #                - schema-registry.confluent.local
+            #
 networks:
   default:
