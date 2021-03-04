@@ -1,27 +1,35 @@
-version: "2"
+version: "3.8"
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.4.0
+    image: ${REPOSITORY}/cp-zookeeper:${TAG}
     hostname: zookeeper
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
 
   kafka:
-    image: confluentinc/cp-kafka:5.4.0
-    container_name: kafka
+    image: ${REPOSITORY}/cp-enterprise-kafka:${TAG}
     hostname: kafka
+    container_name: kafka
     depends_on:
       - zookeeper
+    ports:
+      - 9093:9093
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
-      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: "1"
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
-      KAFKA_BROKER_ID: "1"
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:9092
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_ENABLE: 'true'
+      CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:5.4.0
+    image: ${REPOSITORY}/cp-schema-registry:${TAG}
     hostname: schema-registry
     container_name: schema-registry
     depends_on:
@@ -35,6 +43,7 @@ services:
       SCHEMA_REGISTRY_AUTHENTICATION_METHOD: "BASIC"
       SCHEMA_REGISTRY_AUTHENTICATION_ROLES: "write,read,admin"
       SCHEMA_REGISTRY_AUTHENTICATION_REALM: "Schema"
+      SCHEMA_REGISTRY_CONFLUENT_LICENSE_REPLICATION_FACTOR: 1
       SCHEMA_REGISTRY_OPTS: "-Djava.security.auth.login.config=/tmp/jaas_config.file"
       SCHEMA_REGISTRY_SCHEMA_REGISTRY_RESOURCE_EXTENSION_CLASS: io.confluent.kafka.schemaregistry.security.SchemaRegistrySecurityResourceExtension
       SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_AUTHORIZER_CLASS: io.confluent.kafka.schemaregistry.security.authorizer.schemaregistryacl.SchemaRegistryAclAuthorizer
