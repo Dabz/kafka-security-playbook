@@ -1,0 +1,24 @@
+#!/bin/sh
+
+docker-compose up -d
+
+# Creating the user admin (super user)
+# The first user needs to be created using the zookeeper connection (bootstrapping process)
+docker-compose exec kafka-source kafka-configs --zookeeper zookeeper-source:2181 --alter --add-config 'SCRAM-SHA-256=[password=admin-secret],SCRAM-SHA-512=[password=admin-secret]' --entity-type users --entity-name admin
+docker-compose exec kafka-destination kafka-configs --zookeeper zookeeper-destination:2181 --alter --add-config 'SCRAM-SHA-256=[password=admin-secret],SCRAM-SHA-512=[password=admin-secret]' --entity-type users --entity-name admin
+
+# All additional users can be created using the broker connection
+docker-compose exec kafka-source kafka-configs --bootstrap-server kafka-source:9092 --alter --add-config 'SCRAM-SHA-256=[password=kafka-secret],SCRAM-SHA-512=[password=kafka-secret]' --entity-type users --entity-name kafka --command-config /tmp/admin.properties
+docker-compose exec kafka-destination kafka-configs --bootstrap-server kafka-destination:9092 --alter --add-config 'SCRAM-SHA-256=[password=kafka-secret],SCRAM-SHA-512=[password=kafka-secret]' --entity-type users --entity-name kafka --command-config /tmp/admin.properties
+
+# Create cluster link
+docker-compose exec kafka-destination kafka-cluster-links --command-config /tmp/cluster-destination.properties --bootstrap-server kafka-destination:9092 --config-file /tmp/cluster-source.properties --create --link-name cluster-source
+
+# Create topics in source cluster
+docker-compose exec kafka-source kafka-topics   --bootstrap-server kafka-source:9092 --command-config /tmp/cluster-source.properties --topic test --create
+
+# Create mirrored topics
+docker-compose exec kafka-destination kafka-topics --command-config /tmp/cluster-destination.properties --bootstrap-server kafka-destination:9092 --create  --link-name cluster-source --mirror-topic test --topic test
+
+echo "docker-compose exec kafka-source kafka-console-producer --broker-list kafka-source:9092 --topic test --producer.config /tmp/cluster-source.properties"
+echo "docker-compose exec kafka-destination kafka-console-consumer --bootstrap-server kafka-destination:9092 --consumer.config /tmp/cluster-destination.properties  --topic test"
