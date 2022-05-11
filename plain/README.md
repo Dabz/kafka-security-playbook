@@ -104,8 +104,23 @@ $ kafka-acls --bootstrap-server localhost:9093 --command-config ~/projects/confl
 $ kafka-acls --bootstrap-server localhost:9093 --command-config ~/projects/confluent/kafka-security-playbook/plain/admin.properties --remove --allow-principal User:consumer --consumer --topic=test --group=group1
 ```
 
-* Deny rule:
+* Deny rule: (Deny rule takes precedence over Allow rule)
 
 ```bash
-
+$ kafka-acls --bootstrap-server localhost:9093 --command-config ~/projects/confluent/kafka-security-playbook/plain/admin.properties --add --deny-principal User:producer --topic=test
 ```
+
+There will be a permission for
+
+```bash
+Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=test, patternType=LITERAL)`:
+    ...
+	(principal=User:producer, host=*, operation=ALL, permissionType=DENY)
+	...
+```
+
+```bash
+$ kafka-acls --bootstrap-server localhost:9093 --command-config ~/projects/confluent/kafka-security-playbook/plain/admin.properties --remove --deny-principal User:producer --topic=test --force
+```
+
+
