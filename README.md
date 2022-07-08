@@ -11,8 +11,8 @@ Plain authentication is a simple mechanism based on username/password. It should
 ```bash
 cd plain
 ./up
-kafka-console-producer --broker-list kafka:9093 --producer.config /etc/kafka/consumer.properties --topic test
-kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config /etc/kafka/consumer.properties --topic test --from-beginning
+kafka-console-producer --broker-list kafka:9093 --producer.config producer.properties --topic test
+kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config consumer.properties --topic test --from-beginning
 ```
 
 ### Important configuration files
