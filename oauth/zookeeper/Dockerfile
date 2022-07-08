@@ -2,6 +2,11 @@ FROM centos:centos8
 MAINTAINER seknop@gmail.com
 ENV container docker
 
+# EOL CentOS 8 workaround 
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN yum update -y
+
 # 1. Adding Confluent repository
 RUN rpm --import https://packages.confluent.io/rpm/5.4/archive.key
 COPY confluent.repo /etc/yum.repos.d/confluent.repo
