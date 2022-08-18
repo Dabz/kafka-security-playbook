@@ -1,0 +1,101 @@
+---
+version: '3'
+services:
+  kafka-controller-1:
+    build: ./image/kafka-images/kafka/
+    hostname: kafka-controller-1
+    container_name: kafka-controller-1
+    environment:
+      KAFKA_LISTENERS: CONTROLLER://:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_PROCESS_ROLES: controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-controller-1:9092,2@kafka-controller-2:9092,3@kafka-controller-3:9092
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    ports:
+      - 9093:9093
+  kafka-controller-2:
+    build: ./image/kafka-images/kafka/
+    hostname: kafka-controller-2
+    container_name: kafka-controller-2
+    environment:
+      KAFKA_LISTENERS: CONTROLLER://:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_PROCESS_ROLES: controller
+      KAFKA_NODE_ID: 2
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-controller-1:9092,2@kafka-controller-2:9092,3@kafka-controller-3:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    ports:
+      - 9094:9094
+
+  kafka-controller-3:
+    build: ./image/kafka-images/kafka/
+    hostname: kafka-controller-3
+    container_name: kafka-controller-3
+    environment:
+      KAFKA_LISTENERS: CONTROLLER://:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_PROCESS_ROLES: controller
+      KAFKA_NODE_ID: 3
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-controller-1:9092,2@kafka-controller-2:9092,3@kafka-controller-3:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    ports:
+      - 9095:9095
+
+  kafka-1:
+    build: ./image/kafka-images/kafka/
+    hostname: kafka-1
+    container_name: kafka-1
+    environment:
+      KAFKA_BROKER_ID: 11
+      KAFKA_LISTENERS: INTERNAL://:9092,OUTSIDE://:9091
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-1:9092,OUTSIDE://localhost:9091
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9999
+      KAFKA_JMX_HOSTNAME: kafka-1
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-controller-1:9092,2@kafka-controller-2:9092,3@kafka-controller-3:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    ports:
+      - 9091:9091
+
+  kafka-2:
+    build: ./image/kafka-images/kafka/
+    hostname: kafka-2
+    container_name: kafka-2
+    environment:
+      KAFKA_BROKER_ID: 12
+      KAFKA_LISTENERS: INTERNAL://:9092,OUTSIDE://:9090
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-1:9092,OUTSIDE://localhost:9090
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9999
+      KAFKA_JMX_HOSTNAME: kafka-2
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-controller-1:9092,2@kafka-controller-2:9092,3@kafka-controller-3:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    ports:
+      - 9090:9090
+
+  kafka-3:
+    build: ./image/kafka-images/kafka/
+    hostname: kafka-3
+    container_name: kafka-3
+    environment:
+      KAFKA_BROKER_ID: 13
+      KAFKA_LISTENERS: INTERNAL://:9092,OUTSIDE://:9089
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-1:9092,OUTSIDE://localhost:9089
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9999
+      KAFKA_JMX_HOSTNAME: kafka-3
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-controller-1:9092,2@kafka-controller-2:9092,3@kafka-controller-3:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    ports:
+      - 9089:9089
