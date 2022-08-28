@@ -2,6 +2,11 @@ FROM centos:centos8
 MAINTAINER d.gasparina@gmail.com
 ENV container docker
 
+# EOL CentOS 8 workaround 
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN yum update -y
+
 # 1. Installing Kerberos server, admin and client
 RUN yum install -y krb5-server krb5-libs 
 RUN yum install -y krb5-workstation krb5-libs 
