@@ -2,6 +2,10 @@ FROM centos:centos8
 MAINTAINER seknop@gmail.com
 ENV container docker
 
+# 0. Fixing Mirror list for Centos
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-Linux-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-*
+
 # 1. Adding Confluent repository
 RUN rpm --import https://packages.confluent.io/rpm/5.5/archive.key
 COPY confluent.repo /etc/yum.repos.d/confluent.repo
