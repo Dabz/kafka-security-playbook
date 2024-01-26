@@ -42,3 +42,8 @@ services:
                                                               username="admin" \
                                                               password="admin-secret" ;
         KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+        KAFKA_ZOOKEEPER_SET_ACL: "false"
+        KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
+        KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
+        KAFKA_SUPER_USERS: "User:admin"
